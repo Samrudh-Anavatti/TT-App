@@ -95,12 +95,33 @@ One-time setup:
 2. Repo **Settings → Secrets and variables → Actions → Variables**: add
    `VITE_API_URL` pointing at your deployed backend.
 
-### Backend → Azure App Service (or Railway/Render)
+### Backend → Azure App Service (GitHub Actions)
 
-`.github/workflows/deploy-backend.yml` is a manual-trigger template. Add the
-`AZURE_WEBAPP_NAME` and `AZURE_WEBAPP_PUBLISH_PROFILE` secrets, set `CORS_ORIGINS`
-to your Pages origin on the web app, then run it from the Actions tab. A `Dockerfile`
-is included if you prefer container-based deploys.
+Same style as the frontend: `.github/workflows/deploy-backend.yml` runs tests and
+deploys on push to `main` (paths `backend/**`). One-time Azure setup:
+
+1. **Create the Web App** — a Linux App Service running **Python 3.11** (Free F1 tier
+   is enough). Note its name.
+2. **Configure the Web App** (Configuration → Application settings):
+
+   | Setting | Value |
+   |---------|-------|
+   | `SCM_DO_BUILD_DURING_DEPLOYMENT` | `true` |
+   | `DATA_DIR` | `/home/data` |
+   | `CORS_ORIGINS` | `https://<username>.github.io` |
+   | `SEED_ON_STARTUP` | `true` |
+   | `NORTHSIDE_PIN` / `RIVERSIDE_PIN` | your real PINs |
+
+   Startup command:
+   ```
+   python -m uvicorn app.main:app --host 0.0.0.0 --port 8000
+   ```
+3. **Wire up GitHub** — add repo **Variable** `AZURE_WEBAPP_NAME` and **Secret**
+   `AZURE_WEBAPP_PUBLISH_PROFILE` (Web App → "Get publish profile"). Until the
+   variable is set, the deploy step is skipped and tests still run green.
+
+Then set the frontend's `VITE_API_URL` variable to `https://<app>.azurewebsites.net/api/v1`
+and re-run the frontend workflow. A `Dockerfile` is included if you prefer container deploys.
 
 ## Reconfiguring clubs & PINs
 

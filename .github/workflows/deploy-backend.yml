@@ -1,21 +1,31 @@
 name: Deploy backend to Azure App Service
 
-# Manual-only for now: wire up the secrets below, then run from the Actions tab.
-# The frontend (GitHub Pages) works independently; this is the separate backend host.
 on:
+  push:
+    branches: [main]
+    paths:
+      - 'backend/**'
+      - '.github/workflows/deploy-backend.yml'
   workflow_dispatch:
 
-# Required repo secrets (Settings > Secrets and variables > Actions):
-#   AZURE_WEBAPP_NAME            - your App Service name
-#   AZURE_WEBAPP_PUBLISH_PROFILE - download from the App Service "Get publish profile"
-#
-# App Service settings to configure on the web app itself:
-#   CORS_ORIGINS = https://<username>.github.io   (lock CORS to your Pages origin)
-#   DATA_DIR     = /home/data                      (persisted storage on App Service)
-#   NORTHSIDE_PIN / RIVERSIDE_PIN = your real PINs
+# ── One-time Azure setup (see README > Deployment) ────────────────────────────
+# 1. Create a Linux Web App running Python 3.11 (Free F1 tier is fine).
+# 2. On the Web App, set these Configuration > Application settings:
+#      SCM_DO_BUILD_DURING_DEPLOYMENT = true   (so Azure pip-installs requirements)
+#      DATA_DIR        = /home/data            (persisted SQLite storage)
+#      CORS_ORIGINS    = https://<username>.github.io
+#      SEED_ON_STARTUP = true
+#      NORTHSIDE_PIN / RIVERSIDE_PIN = your real PINs
+#    and the Startup Command:
+#      python -m uvicorn app.main:app --host 0.0.0.0 --port 8000
+# 3. Add to the GitHub repo:
+#      Variable  AZURE_WEBAPP_NAME            (Settings > Variables)
+#      Secret    AZURE_WEBAPP_PUBLISH_PROFILE (Web App > "Get publish profile")
+# Until the AZURE_WEBAPP_NAME variable exists, the deploy step is skipped so the
+# tests still run green on every push.
 
 jobs:
-  deploy:
+  build-and-deploy:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -24,19 +34,17 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Install deps
+      - name: Install deps & run tests
         working-directory: backend
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-
-      - name: Run tests
-        working-directory: backend
-        run: pytest -q
+          pytest -q
 
       - name: Deploy to Azure Web App
+        if: ${{ vars.AZURE_WEBAPP_NAME != '' }}
         uses: azure/webapps-deploy@v3
         with:
-          app-name: ${{ secrets.AZURE_WEBAPP_NAME }}
+          app-name: ${{ vars.AZURE_WEBAPP_NAME }}
           publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
           package: backend
