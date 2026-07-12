@@ -17,7 +17,7 @@ on:
 #      SEED_ON_STARTUP = true
 #      NORTHSIDE_PIN / RIVERSIDE_PIN = your real PINs
 #    and the Startup Command:
-#      python -m uvicorn app.main:app --host 0.0.0.0 --port 8000
+#      bash startup.sh          (see backend/startup.sh)
 # 3. Add to the GitHub repo:
 #      Variable  AZURE_WEBAPP_NAME            (Settings > Variables)
 #      Secret    AZURE_WEBAPP_PUBLISH_PROFILE (Web App > "Get publish profile")

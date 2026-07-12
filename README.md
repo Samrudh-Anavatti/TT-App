@@ -112,9 +112,9 @@ deploys on push to `main` (paths `backend/**`). One-time Azure setup:
    | `SEED_ON_STARTUP` | `true` |
    | `NORTHSIDE_PIN` / `RIVERSIDE_PIN` | your real PINs |
 
-   Startup command:
+   Startup command (see `backend/startup.sh`):
    ```
-   python -m uvicorn app.main:app --host 0.0.0.0 --port 8000
+   bash startup.sh
    ```
 3. **Wire up GitHub** — add repo **Variable** `AZURE_WEBAPP_NAME` and **Secret**
    `AZURE_WEBAPP_PUBLISH_PROFILE` (Web App → "Get publish profile"). Until the
