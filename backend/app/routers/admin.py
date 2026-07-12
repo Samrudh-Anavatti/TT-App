@@ -87,7 +87,7 @@ def add_player(
     club: Club = Depends(require_admin),
     db: Session = Depends(get_db),
 ):
-    player = Player(club_id=club.id, name=payload.name.strip())
+    player = Player(club_id=club.id, name=payload.name.strip(), elo=payload.elo)
     db.add(player)
     db.commit()
     db.refresh(player)
@@ -106,6 +106,8 @@ def edit_player(
         player.name = payload.name.strip()
     if payload.active is not None:
         player.active = payload.active
+    if payload.elo is not None:
+        player.elo = payload.elo
     db.commit()
     db.refresh(player)
     return player

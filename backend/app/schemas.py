@@ -76,11 +76,13 @@ class RecordMatchIn(BaseModel):
 
 class PlayerCreate(BaseModel):
     name: str = Field(min_length=1, max_length=80)
+    elo: int = Field(default=1000, ge=100, le=4000)  # starting rating; floor is 100
 
 
 class PlayerUpdate(BaseModel):
     name: str | None = Field(default=None, min_length=1, max_length=80)
     active: bool | None = None
+    elo: int | None = Field(default=None, ge=100, le=4000)
 
 
 class MatchRequestUpdate(BaseModel):
