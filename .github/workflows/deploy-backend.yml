@@ -1,0 +1,42 @@
+name: Deploy backend to Azure App Service
+
+# Manual-only for now: wire up the secrets below, then run from the Actions tab.
+# The frontend (GitHub Pages) works independently; this is the separate backend host.
+on:
+  workflow_dispatch:
+
+# Required repo secrets (Settings > Secrets and variables > Actions):
+#   AZURE_WEBAPP_NAME            - your App Service name
+#   AZURE_WEBAPP_PUBLISH_PROFILE - download from the App Service "Get publish profile"
+#
+# App Service settings to configure on the web app itself:
+#   CORS_ORIGINS = https://<username>.github.io   (lock CORS to your Pages origin)
+#   DATA_DIR     = /home/data                      (persisted storage on App Service)
+#   NORTHSIDE_PIN / RIVERSIDE_PIN = your real PINs
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install deps
+        working-directory: backend
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run tests
+        working-directory: backend
+        run: pytest -q
+
+      - name: Deploy to Azure Web App
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: ${{ secrets.AZURE_WEBAPP_NAME }}
+          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+          package: backend
