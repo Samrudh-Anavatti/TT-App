@@ -5,6 +5,8 @@ import Shell from '../components/Shell.jsx'
 import Leaderboard from '../components/Leaderboard.jsx'
 import NoticeBoard from '../components/NoticeBoard.jsx'
 import RecentMatches from '../components/RecentMatches.jsx'
+import SessionTimes from '../components/SessionTimes.jsx'
+import ClubBadge from '../components/ClubBadge.jsx'
 
 export default function Dashboard() {
   const { slug } = useParams()
@@ -38,7 +40,12 @@ export default function Dashboard() {
   }
 
   return (
-    <Shell title={clubName} subtitle="Leaderboard & challenges" right={adminLink}>
+    <Shell
+      title={clubName}
+      subtitle="Leaderboard & challenges"
+      right={adminLink}
+      badge={known && <ClubBadge club={known} />}
+    >
       <div className="mb-5 grid gap-3 sm:grid-cols-3">
         <Link
           to={`/${slug}/challenge`}
@@ -73,11 +80,14 @@ export default function Dashboard() {
         ) : (
           <Leaderboard players={leaderboard.data || []} />
         )}
-        {requests.loading ? (
-          <SkeletonCard />
-        ) : (
-          <NoticeBoard slug={slug} requests={requests.data || []} />
-        )}
+        <div className="flex flex-col gap-5">
+          {requests.loading ? (
+            <SkeletonCard />
+          ) : (
+            <NoticeBoard slug={slug} requests={requests.data || []} />
+          )}
+          <SessionTimes club={known} />
+        </div>
       </div>
 
       <div className="mt-5">

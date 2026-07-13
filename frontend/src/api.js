@@ -55,8 +55,29 @@ export const api = {
     request(`/clubs/${slug}/admin/match-requests/${id}`, { method: 'PUT', pin, body }),
 }
 
-// Slugs are baked in for the first cut; later this can come from a /clubs list endpoint.
+// Club metadata is baked in for now; later this can come from a /clubs list endpoint.
+// `logo` points at a file in frontend/public/clubs/ (falls back to `initials` if
+// missing). `sessions` are the club's practice/challenge times.
 export const KNOWN_CLUBS = [
-  { slug: 'stanmore', name: 'Stanmore TTC' },
-  { slug: 'york-gardens', name: 'York Gardens TTC' },
+  {
+    slug: 'stanmore',
+    name: 'Stanmore TTC',
+    initials: 'S',
+    logo: `${import.meta.env.BASE_URL}clubs/stanmore.png`,
+    sessions: [
+      { days: 'Tue & Thu', time: 'from 8:00pm' },
+      { days: 'Sun', time: '10:00am – 1:00pm' },
+    ],
+  },
+  {
+    slug: 'york-gardens',
+    name: 'York Gardens TTC',
+    initials: 'YG',
+    logo: null,
+    sessions: [{ days: 'Mon, Wed & Fri', time: 'from 6:30pm' }],
+  },
 ]
+
+export function getClubMeta(slug) {
+  return KNOWN_CLUBS.find((c) => c.slug === slug) || null
+}

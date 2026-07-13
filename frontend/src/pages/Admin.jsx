@@ -4,6 +4,7 @@ import { KNOWN_CLUBS } from '../api.js'
 import Shell from '../components/Shell.jsx'
 import PinGate from '../components/PinGate.jsx'
 import AdminPanel from '../components/AdminPanel.jsx'
+import ClubBadge from '../components/ClubBadge.jsx'
 
 export default function Admin() {
   const { slug } = useParams()
@@ -19,6 +20,7 @@ export default function Admin() {
     <Shell
       title={`Admin — ${known?.name || slug}`}
       subtitle={pin ? 'Signed in' : undefined}
+      badge={known && <ClubBadge club={known} />}
       right={
         pin ? (
           <div className="flex gap-2">

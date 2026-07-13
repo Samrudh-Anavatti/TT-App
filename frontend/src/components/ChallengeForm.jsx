@@ -8,6 +8,8 @@ export default function ChallengeForm({ slug, players, onDone }) {
   const [scheduledFor, setScheduledFor] = useState('')
   const [status, setStatus] = useState(null) // null | 'saving' | 'done' | Error
 
+  const nameOf = (id) => players.find((p) => p.id === id)?.name
+
   async function submit(e) {
     e.preventDefault()
     setStatus('saving')
@@ -36,10 +38,11 @@ export default function ChallengeForm({ slug, players, onDone }) {
   }
 
   const sameName = challenger && challenger === opponent
+  const ready = challenger && opponent && !sameName
 
   return (
-    <form onSubmit={submit} className="card space-y-4 p-6">
-      <div className="grid gap-4 sm:grid-cols-[1fr_auto_1fr] sm:items-end">
+    <form onSubmit={submit} className="card space-y-5 p-6">
+      <div className="grid gap-3 sm:grid-cols-[1fr_auto_1fr] sm:items-end">
         <div>
           <label className="label">Challenger</label>
           <select className="input" value={challenger} onChange={(e) => setChallenger(e.target.value)} required>
@@ -49,7 +52,11 @@ export default function ChallengeForm({ slug, players, onDone }) {
             ))}
           </select>
         </div>
-        <div className="pb-2.5 text-center text-sm font-bold uppercase text-table/40">vs</div>
+        <div className="flex justify-center pb-1 sm:pb-2.5">
+          <span className="grid h-9 w-9 place-items-center rounded-full bg-ball/10 text-xs font-black uppercase tracking-wide text-ball">
+            vs
+          </span>
+        </div>
         <div>
           <label className="label">Opponent</label>
           <select className="input" value={opponent} onChange={(e) => setOpponent(e.target.value)} required>
@@ -60,6 +67,14 @@ export default function ChallengeForm({ slug, players, onDone }) {
           </select>
         </div>
       </div>
+
+      {ready && (
+        <div className="rounded-xl border border-black/5 bg-chalk/60 px-4 py-3 text-center text-sm animate-slide-up">
+          <span className="font-bold text-table">{nameOf(challenger)}</span>
+          <span className="mx-2" aria-hidden>🏓</span>
+          <span className="font-bold text-table">{nameOf(opponent)}</span>
+        </div>
+      )}
 
       <div>
         <label className="label">Message (optional)</label>
@@ -82,14 +97,10 @@ export default function ChallengeForm({ slug, players, onDone }) {
         />
       </div>
 
-      {sameName && (
-        <p className="text-sm text-ball">Pick two different players.</p>
-      )}
-      {status instanceof Error && (
-        <p className="text-sm text-ball">{status.message}</p>
-      )}
+      {sameName && <p className="text-sm text-ball">Pick two different players.</p>}
+      {status instanceof Error && <p className="text-sm text-ball">{status.message}</p>}
 
-      <button type="submit" className="btn-primary w-full" disabled={status === 'saving' || sameName}>
+      <button type="submit" className="btn-primary w-full" disabled={status === 'saving' || !ready}>
         {status === 'saving' ? 'Posting…' : 'Post Challenge'}
       </button>
     </form>
