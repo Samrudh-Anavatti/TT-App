@@ -15,7 +15,7 @@ on:
 #      DATA_DIR        = /home/data            (persisted SQLite storage)
 #      CORS_ORIGINS    = https://<username>.github.io
 #      SEED_ON_STARTUP = true
-#      NORTHSIDE_PIN / RIVERSIDE_PIN = your real PINs
+#      STANMORE_PIN / YORKGARDENS_PIN = your real PINs
 #    and the Startup Command:
 #      bash startup.sh          (see backend/startup.sh)
 # 3. Add to the GitHub repo:

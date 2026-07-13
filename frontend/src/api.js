@@ -57,6 +57,6 @@ export const api = {
 
 // Slugs are baked in for the first cut; later this can come from a /clubs list endpoint.
 export const KNOWN_CLUBS = [
-  { slug: 'northside', name: 'Northside TTC' },
-  { slug: 'riverside', name: 'Riverside Paddlers' },
+  { slug: 'stanmore', name: 'Stanmore TTC' },
+  { slug: 'york-gardens', name: 'York Gardens TTC' },
 ]

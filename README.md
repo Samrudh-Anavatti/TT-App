@@ -41,12 +41,14 @@ pip install -r requirements.txt
 uvicorn app.main:app --reload
 ```
 
-On first boot it seeds two demo clubs:
+On first boot it seeds two empty clubs (add players via the admin panel):
 
-| Club              | Slug        | Demo PIN |
-|-------------------|-------------|----------|
-| Northside TTC     | `northside` | `1234`   |
-| Riverside Paddlers| `riverside` | `5678`   |
+| Club             | Slug           | PIN env var        |
+|------------------|----------------|--------------------|
+| Stanmore TTC     | `stanmore`     | `STANMORE_PIN`     |
+| York Gardens TTC | `york-gardens` | `YORKGARDENS_PIN`  |
+
+PINs default to `changeme` locally; set the env vars (or App Service settings) for real ones.
 
 API docs: http://localhost:8000/docs
 
@@ -74,8 +76,8 @@ Backend env vars (see `backend/.env.example`):
 
 - `DATABASE_URL` / `DATA_DIR` — where SQLite lives (swap to Postgres later)
 - `CORS_ORIGINS` — comma-separated allowed origins (set to your Pages URL in prod)
-- `SEED_ON_STARTUP` — seed demo data on first boot (default `true`)
-- `NORTHSIDE_PIN` / `RIVERSIDE_PIN` — admin PINs for the seeded clubs
+- `SEED_ON_STARTUP` — seed clubs on first boot when the DB is empty (default `true`)
+- `STANMORE_PIN` / `YORKGARDENS_PIN` — admin PINs for the seeded clubs
 
 Frontend build-time env vars:
 
@@ -110,7 +112,7 @@ deploys on push to `main` (paths `backend/**`). One-time Azure setup:
    | `DATA_DIR` | `/home/data` |
    | `CORS_ORIGINS` | `https://<username>.github.io` |
    | `SEED_ON_STARTUP` | `true` |
-   | `NORTHSIDE_PIN` / `RIVERSIDE_PIN` | your real PINs |
+   | `STANMORE_PIN` / `YORKGARDENS_PIN` | your real PINs |
 
    Startup command (see `backend/startup.sh`):
    ```
