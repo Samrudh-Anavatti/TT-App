@@ -39,6 +39,34 @@ export default function Dashboard() {
 
   return (
     <Shell title={clubName} subtitle="Leaderboard & challenges" right={adminLink}>
+      <div className="mb-5 grid gap-3 sm:grid-cols-3">
+        <Link
+          to={`/${slug}/challenge`}
+          className="card group flex items-center gap-3 p-4 transition hover:-translate-y-0.5 hover:shadow-lg"
+        >
+          <span className="text-2xl" aria-hidden>🏓</span>
+          <div className="min-w-0">
+            <div className="font-semibold text-table">Request a match</div>
+            <div className="text-xs text-table/50">Call someone out</div>
+          </div>
+          <span className="ml-auto text-ball transition group-hover:translate-x-1">→</span>
+        </Link>
+        <div className="card flex items-center gap-3 p-4">
+          <span className="text-2xl" aria-hidden>📈</span>
+          <div className="min-w-0">
+            <div className="font-semibold text-table">Climb the ranks</div>
+            <div className="text-xs text-table/50">Win to raise your Elo</div>
+          </div>
+        </div>
+        <div className="card flex items-center gap-3 p-4">
+          <span className="text-2xl" aria-hidden>🏅</span>
+          <div className="min-w-0">
+            <div className="font-semibold text-table">Top 3 get medals</div>
+            <div className="text-xs text-table/50">Gold, silver, bronze</div>
+          </div>
+        </div>
+      </div>
+
       <div className="grid gap-5 lg:grid-cols-[1.1fr_0.9fr]">
         {leaderboard.loading ? (
           <SkeletonCard />

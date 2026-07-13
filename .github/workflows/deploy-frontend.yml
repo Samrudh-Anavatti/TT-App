@@ -42,6 +42,10 @@ jobs:
           # (Settings > Secrets and variables > Actions > Variables) e.g.
           # https://your-backend.azurewebsites.net/api/v1
           VITE_API_URL: ${{ vars.VITE_API_URL }}
+          # Soft club-entry PINs (NOT the admin PIN). Set repo variable VITE_CLUB_PINS
+          # as "slug:pin" pairs, e.g. "stanmore:1234, york-gardens:5678". A club with
+          # no pair here is left open. Re-run this workflow after changing it.
+          VITE_CLUB_PINS: ${{ vars.VITE_CLUB_PINS }}
         run: npm run build
 
       - uses: actions/upload-pages-artifact@v3
