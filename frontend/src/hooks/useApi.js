@@ -26,14 +26,27 @@ export function useApi(fn, deps = []) {
     ;(async () => {
       setLoading(true)
       setError(null)
-      try {
-        const result = await memoFn()
-        if (alive) setData(result)
-      } catch (e) {
-        if (alive) setError(e)
-      } finally {
-        if (alive) setLoading(false)
+      // Retry once on a likely-transient failure. Free-tier cold starts and
+      // redeploys make the first request after idle fail (502/503/reset); a
+      // short retry lets it self-heal instead of surfacing an error.
+      for (let attempt = 0; attempt < 2 && alive; attempt++) {
+        try {
+          const result = await memoFn()
+          if (alive) {
+            setData(result)
+            setError(null)
+          }
+          break
+        } catch (e) {
+          const transient = !e.status || e.status >= 500
+          if (attempt === 0 && transient) {
+            await new Promise((r) => setTimeout(r, 1200))
+            continue
+          }
+          if (alive) setError(e)
+        }
       }
+      if (alive) setLoading(false)
     })()
     return () => {
       alive = false
