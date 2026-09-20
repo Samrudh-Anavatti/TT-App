@@ -6,7 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from .database import Base, engine
 from .routers import admin, public, tournaments
-from .seed import seed_if_empty
+from .seed import seed_if_empty, sync_admin_pins
 
 app = FastAPI(title="PongPoints API", version="0.1.0")
 
@@ -33,6 +33,8 @@ def on_startup():
     Base.metadata.create_all(bind=engine)
     if os.getenv("SEED_ON_STARTUP", "true").lower() == "true":
         seed_if_empty()
+    # Let the admin password be rotated via the App Service setting + restart.
+    sync_admin_pins()
 
 
 @app.get("/api/v1/health", tags=["meta"])
