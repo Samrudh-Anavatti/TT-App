@@ -17,6 +17,7 @@ class PlayerOut(BaseModel):
     id: str
     name: str
     elo: int
+    unrated: bool = False
     matches_played: int
     wins: int
     losses: int
@@ -77,6 +78,7 @@ class RecordMatchIn(BaseModel):
 class PlayerCreate(BaseModel):
     name: str = Field(min_length=1, max_length=80)
     elo: int = Field(default=1000, ge=100, le=4000)  # starting rating; floor is 100
+    unrated: bool = False  # add with no rating yet — a coach sets `elo` later
 
 
 class PlayerUpdate(BaseModel):

@@ -42,6 +42,10 @@ def record_match(
     winner = _require_player(db, club.id, payload.winner_id)
     loser = _require_player(db, club.id, payload.loser_id)
 
+    for p in (winner, loser):
+        if p.unrated:
+            raise HTTPException(400, f"Set a rating for {p.name} before recording a match")
+
     match, result = apply_and_record_match(
         db, club.id, winner, loser, notes=payload.notes, played_at=payload.played_at
     )
@@ -69,7 +73,12 @@ def add_player(
     club: Club = Depends(require_admin),
     db: Session = Depends(get_db),
 ):
-    player = Player(club_id=club.id, name=payload.name.strip(), elo=payload.elo)
+    player = Player(
+        club_id=club.id,
+        name=payload.name.strip(),
+        elo=payload.elo,
+        unrated=payload.unrated,
+    )
     db.add(player)
     db.commit()
     db.refresh(player)
@@ -90,6 +99,7 @@ def edit_player(
         player.active = payload.active
     if payload.elo is not None:
         player.elo = payload.elo
+        player.unrated = False  # setting a rating graduates an unrated player
     db.commit()
     db.refresh(player)
     return player

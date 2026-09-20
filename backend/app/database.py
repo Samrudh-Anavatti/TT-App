@@ -30,3 +30,21 @@ def get_db():
         yield db
     finally:
         db.close()
+
+
+def ensure_schema() -> None:
+    """Tiny idempotent migrations for columns added after initial release.
+
+    ``Base.metadata.create_all`` creates missing *tables* but never alters an
+    existing one, so a column added to a shipped table (here: players.unrated)
+    must be backfilled by hand. SQLite only; other engines get it via create_all
+    on a fresh DB or a real migration tool later.
+    """
+    if not DATABASE_URL.startswith("sqlite"):
+        return
+    with engine.begin() as conn:
+        cols = {row[1] for row in conn.exec_driver_sql("PRAGMA table_info(players)")}
+        if "unrated" not in cols:
+            conn.exec_driver_sql(
+                "ALTER TABLE players ADD COLUMN unrated BOOLEAN NOT NULL DEFAULT 0"
+            )

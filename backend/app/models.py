@@ -37,6 +37,9 @@ class Player(Base):
     club_id: Mapped[str] = mapped_column(ForeignKey("clubs.id"), index=True, nullable=False)
     name: Mapped[str] = mapped_column(String, nullable=False)
     elo: Mapped[int] = mapped_column(Integer, default=1000)
+    # True = no rating yet (a coach sets it later). The `elo` above is a hidden
+    # placeholder while unrated; the UI shows "–", never the number.
+    unrated: Mapped[bool] = mapped_column(Boolean, default=False)
     matches_played: Mapped[int] = mapped_column(Integer, default=0)
     wins: Mapped[int] = mapped_column(Integer, default=0)
     losses: Mapped[int] = mapped_column(Integer, default=0)

@@ -27,7 +27,8 @@ def leaderboard(club: Club = Depends(get_club), db: Session = Depends(get_db)):
     players = db.scalars(
         select(Player)
         .where(Player.club_id == club.id, Player.active == True)  # noqa: E712
-        .order_by(Player.elo.desc(), Player.wins.desc())
+        # Rated players ranked first; unrated ("–") sink to the bottom.
+        .order_by(Player.unrated.asc(), Player.elo.desc(), Player.wins.desc())
     ).all()
     return [
         LeaderboardEntry(rank=i + 1, **_player_dict(p)) for i, p in enumerate(players)
@@ -114,6 +115,7 @@ def _player_dict(p: Player) -> dict:
         "id": p.id,
         "name": p.name,
         "elo": p.elo,
+        "unrated": p.unrated,
         "matches_played": p.matches_played,
         "wins": p.wins,
         "losses": p.losses,

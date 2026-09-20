@@ -24,8 +24,8 @@ export default function Leaderboard({ players = [] }) {
       ) : (
         <ul className="divide-y divide-black/5">
           {players.map((p) => {
-            const medal = MEDALS[p.rank]
-            const isChamp = p.rank === 1
+            const medal = p.unrated ? null : MEDALS[p.rank]
+            const isChamp = p.rank === 1 && !p.unrated
             return (
               <li
                 key={p.id}
@@ -60,11 +60,16 @@ export default function Leaderboard({ players = [] }) {
                 </div>
 
                 <div className="text-right leading-none">
-                  <div className="font-mono text-lg font-bold tabular-nums text-table">
-                    {p.elo}
+                  <div
+                    className={`font-mono text-lg font-bold tabular-nums ${
+                      p.unrated ? 'text-table/30' : 'text-table'
+                    }`}
+                    title={p.unrated ? 'Awaiting a rating from a coach' : undefined}
+                  >
+                    {p.unrated ? '–' : p.elo}
                   </div>
                   <div className="mt-0.5 text-[10px] font-semibold uppercase tracking-wider text-table/35">
-                    Elo
+                    {p.unrated ? 'Unrated' : 'Elo'}
                   </div>
                 </div>
               </li>

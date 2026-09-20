@@ -9,7 +9,9 @@ export default function RecordMatch({ slug, pin, players, onRecorded }) {
   const [result, setResult] = useState(null)
   const [error, setError] = useState(null)
 
-  const active = players.filter((p) => p.active)
+  // Unrated players can't be in a recorded match until a coach sets their rating.
+  const active = players.filter((p) => p.active && !p.unrated)
+  const unratedCount = players.filter((p) => p.active && p.unrated).length
   const sameName = winner && winner === loser
   const ready = winner && loser && !sameName
 
@@ -38,7 +40,14 @@ export default function RecordMatch({ slug, pin, players, onRecorded }) {
       <h2 className="flex items-center gap-2 font-extrabold tracking-tight text-table">
         <span aria-hidden>📋</span> Record Match
       </h2>
-      <p className="mb-4 mt-1 text-sm text-table/55">Log a result — Elo updates automatically.</p>
+      <p className="mb-4 mt-1 text-sm text-table/55">
+        Log a result — Elo updates automatically.
+        {unratedCount > 0 && (
+          <span className="mt-1 block text-xs text-amber-700">
+            {unratedCount} unrated player{unratedCount === 1 ? '' : 's'} hidden here until they’re rated.
+          </span>
+        )}
+      </p>
 
       <form onSubmit={submit} className="space-y-4">
         <div className="grid gap-3 sm:grid-cols-[1fr_auto_1fr] sm:items-end">

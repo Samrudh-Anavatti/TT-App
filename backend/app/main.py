@@ -4,7 +4,7 @@ import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from .database import Base, engine
+from .database import Base, engine, ensure_schema
 from .routers import admin, public, tournaments
 from .seed import seed_if_empty, sync_admin_pins
 
@@ -31,6 +31,7 @@ app.include_router(tournaments.admin_router, prefix="/api/v1")
 @app.on_event("startup")
 def on_startup():
     Base.metadata.create_all(bind=engine)
+    ensure_schema()
     if os.getenv("SEED_ON_STARTUP", "true").lower() == "true":
         seed_if_empty()
     # Let the admin password be rotated via the App Service setting + restart.
