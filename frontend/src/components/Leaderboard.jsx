@@ -1,4 +1,7 @@
+import { useState } from 'react'
+
 const MEDALS = { 1: '🥇', 2: '🥈', 3: '🥉' }
+const COLLAPSED_COUNT = 10
 
 function winRate(p) {
   if (!p.matches_played) return '—'
@@ -6,6 +9,10 @@ function winRate(p) {
 }
 
 export default function Leaderboard({ players = [] }) {
+  const [expanded, setExpanded] = useState(false)
+  const canCollapse = players.length > COLLAPSED_COUNT
+  const visible = expanded || !canCollapse ? players : players.slice(0, COLLAPSED_COUNT)
+
   return (
     <section className="card overflow-hidden">
       <div className="flex items-center justify-between border-b border-black/5 px-5 py-4">
@@ -22,8 +29,9 @@ export default function Leaderboard({ players = [] }) {
           No players on the board yet. Ask an admin to add the roster. 🏓
         </p>
       ) : (
-        <ul className="divide-y divide-black/5">
-          {players.map((p) => {
+        <>
+          <ul className="divide-y divide-black/5">
+          {visible.map((p) => {
             const medal = p.unrated ? null : MEDALS[p.rank]
             const isChamp = p.rank === 1 && !p.unrated
             return (
@@ -75,7 +83,17 @@ export default function Leaderboard({ players = [] }) {
               </li>
             )
           })}
-        </ul>
+          </ul>
+          {canCollapse && (
+            <button
+              type="button"
+              onClick={() => setExpanded((v) => !v)}
+              className="w-full border-t border-black/5 px-5 py-3 text-sm font-semibold text-ball transition hover:bg-chalk/60"
+            >
+              {expanded ? 'Show fewer ↑' : `Show all ${players.length} players ↓`}
+            </button>
+          )}
+        </>
       )}
     </section>
   )

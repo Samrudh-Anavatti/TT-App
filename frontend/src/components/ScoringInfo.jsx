@@ -7,10 +7,10 @@ export default function ScoringInfo() {
         <span aria-hidden>⚡</span> How ratings work
       </h2>
       <p className="mt-2 text-sm leading-relaxed text-table/60">
-        Everyone starts at <span className="font-semibold text-table">1000</span>. Win and
-        you climb, lose and you slip — and here it moves <span className="font-semibold text-table">fast</span>.
-        We run a high-swing rating on purpose, so a good run rockets you up the board and a
-        couple of losses can knock a leader right back into the pack.
+        Win and you climb, lose and you slip — and here it moves{' '}
+        <span className="font-semibold text-table">fast</span>. We run a high-swing rating on
+        purpose, so a good run rockets you up the board and a couple of losses can knock a
+        leader right back into the pack.
       </p>
       <ul className="mt-4 space-y-2 text-sm text-table/70">
         <li className="flex gap-2">
