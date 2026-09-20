@@ -29,7 +29,7 @@ export default function PinGate({ slug, onUnlock }) {
         </div>
         <input
           type="password"
-          inputMode="numeric"
+          inputMode="text"
           autoFocus
           className="input text-center text-lg tracking-[0.3em]"
           placeholder="••••"

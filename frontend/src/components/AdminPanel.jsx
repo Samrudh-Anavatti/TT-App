@@ -2,6 +2,7 @@ import { api } from '../api.js'
 import { useApi } from '../hooks/useApi.js'
 import RecordMatch from './RecordMatch.jsx'
 import ManagePlayers from './ManagePlayers.jsx'
+import Participation from './Participation.jsx'
 
 export default function AdminPanel({ slug, pin }) {
   const players = useApi(() => api.listPlayers(slug, pin), [slug, pin])
@@ -22,6 +23,8 @@ export default function AdminPanel({ slug, pin }) {
   return (
     <div className="space-y-5">
       <RecordMatch slug={slug} pin={pin} players={list} onRecorded={refreshAll} />
+
+      <Participation slug={slug} pin={pin} />
 
       <ManagePlayers slug={slug} pin={pin} players={list} onChange={players.reload} />
 

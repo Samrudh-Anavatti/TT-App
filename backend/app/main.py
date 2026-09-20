@@ -5,7 +5,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from .database import Base, engine
-from .routers import admin, public
+from .routers import admin, public, tournaments
 from .seed import seed_if_empty
 
 app = FastAPI(title="PongPoints API", version="0.1.0")
@@ -24,6 +24,8 @@ app.add_middleware(
 
 app.include_router(public.router, prefix="/api/v1")
 app.include_router(admin.router, prefix="/api/v1")
+app.include_router(tournaments.public_router, prefix="/api/v1")
+app.include_router(tournaments.admin_router, prefix="/api/v1")
 
 
 @app.on_event("startup")

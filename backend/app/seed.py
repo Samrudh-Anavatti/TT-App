@@ -16,7 +16,6 @@ from .security import hash_pin
 
 _CLUBS = [
     {"name": "Stanmore TTC", "slug": "stanmore", "pin_env": "STANMORE_PIN", "default_pin": "changeme"},
-    {"name": "York Gardens TTC", "slug": "york-gardens", "pin_env": "YORKGARDENS_PIN", "default_pin": "changeme"},
 ]
 
 

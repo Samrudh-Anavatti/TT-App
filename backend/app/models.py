@@ -72,3 +72,49 @@ class MatchRequest(Base):
     message: Mapped[str | None] = mapped_column(Text, nullable=True)
     requested_at: Mapped[datetime] = mapped_column(DateTime, default=_now)
     scheduled_for: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+
+
+class Tournament(Base):
+    __tablename__ = "tournaments"
+
+    id: Mapped[str] = mapped_column(String, primary_key=True, default=_uuid)
+    club_id: Mapped[str] = mapped_column(ForeignKey("clubs.id"), index=True, nullable=False)
+    name: Mapped[str] = mapped_column(String, nullable=False)
+    status: Mapped[str] = mapped_column(String, default="active")  # active/completed
+    # Flat Elo bonus awarded to the winner's global rating on completion.
+    rating_prize: Mapped[int] = mapped_column(Integer, default=25)
+    winner_id: Mapped[str | None] = mapped_column(ForeignKey("players.id"), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=_now)
+    completed_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+
+
+class TournamentParticipant(Base):
+    __tablename__ = "tournament_participants"
+
+    id: Mapped[str] = mapped_column(String, primary_key=True, default=_uuid)
+    tournament_id: Mapped[str] = mapped_column(
+        ForeignKey("tournaments.id"), index=True, nullable=False
+    )
+    player_id: Mapped[str] = mapped_column(ForeignKey("players.id"), nullable=False)
+    joined_at: Mapped[datetime] = mapped_column(DateTime, default=_now)
+
+
+class TournamentMatch(Base):
+    """A result played within a tournament.
+
+    Recording one also writes a normal ``Match`` (so it updates global Elo and
+    shows in the recent-matches feed); this row scopes it to the tournament for
+    standings. ``match_id`` links back to that global match.
+    """
+
+    __tablename__ = "tournament_matches"
+
+    id: Mapped[str] = mapped_column(String, primary_key=True, default=_uuid)
+    tournament_id: Mapped[str] = mapped_column(
+        ForeignKey("tournaments.id"), index=True, nullable=False
+    )
+    match_id: Mapped[str] = mapped_column(ForeignKey("matches.id"), nullable=False)
+    winner_id: Mapped[str] = mapped_column(ForeignKey("players.id"), nullable=False)
+    loser_id: Mapped[str] = mapped_column(ForeignKey("players.id"), nullable=False)
+    elo_change: Mapped[int] = mapped_column(Integer, nullable=False)
+    played_at: Mapped[datetime] = mapped_column(DateTime, default=_now)

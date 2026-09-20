@@ -1,17 +1,20 @@
 """ELO rating engine.
 
-Standard ELO with a K-factor of 32 (see DESIGN.md > ELO System).
+Standard ELO, but tuned for a *volatile* club ladder — we deliberately run a
+high K-factor so ratings move fast: a couple of wins rockets you up, a couple of
+losses knocks you down, and nobody holds the top for long. Set ``ELO_K`` to tune.
 
     Expected score:  E_a = 1 / (1 + 10^((R_b - R_a) / 400))
     New rating:      R_a' = R_a + K * (S_a - E_a)
 
-Note: the illustrative examples in DESIGN.md (e.g. "1200 vs 1000 -> +10")
-are approximate. This module implements the precise formula above, so the
-equal-rating case yields the documented +16 / -16 and others differ slightly.
+With the default K of 64, two equally-rated players swing +32 / -32 per game
+(double the classic 32-K's +16 / -16), so the ladder churns noticeably faster.
 """
+import os
 from dataclasses import dataclass
 
-K_FACTOR = 32
+# High by design — see module docstring. Override with the ELO_K env var.
+K_FACTOR = int(os.getenv("ELO_K", "64"))
 STARTING_ELO = 1000
 MIN_ELO = 100
 

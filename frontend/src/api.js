@@ -43,6 +43,7 @@ export const api = {
   verifyPin: (slug, pin) =>
     request(`/clubs/${slug}/admin/verify`, { method: 'POST', pin }),
   listPlayers: (slug, pin) => request(`/clubs/${slug}/admin/players`, { pin }),
+  getParticipation: (slug, pin) => request(`/clubs/${slug}/admin/participation`, { pin }),
   recordMatch: (slug, pin, body) =>
     request(`/clubs/${slug}/admin/matches`, { method: 'POST', pin, body }),
   addPlayer: (slug, pin, body) =>
@@ -53,11 +54,30 @@ export const api = {
     request(`/clubs/${slug}/admin/players/${id}`, { method: 'DELETE', pin }),
   updateMatchRequest: (slug, pin, id, body) =>
     request(`/clubs/${slug}/admin/match-requests/${id}`, { method: 'PUT', pin, body }),
+
+  // tournaments — public
+  getTournaments: (slug) => request(`/clubs/${slug}/tournaments`),
+  getTournament: (slug, id) => request(`/clubs/${slug}/tournaments/${id}`),
+
+  // tournaments — admin
+  createTournament: (slug, pin, body) =>
+    request(`/clubs/${slug}/admin/tournaments`, { method: 'POST', pin, body }),
+  addTournamentParticipant: (slug, pin, id, body) =>
+    request(`/clubs/${slug}/admin/tournaments/${id}/participants`, { method: 'POST', pin, body }),
+  removeTournamentParticipant: (slug, pin, id, playerId) =>
+    request(`/clubs/${slug}/admin/tournaments/${id}/participants/${playerId}`, { method: 'DELETE', pin }),
+  recordTournamentMatch: (slug, pin, id, body) =>
+    request(`/clubs/${slug}/admin/tournaments/${id}/matches`, { method: 'POST', pin, body }),
+  completeTournament: (slug, pin, id) =>
+    request(`/clubs/${slug}/admin/tournaments/${id}/complete`, { method: 'POST', pin }),
 }
 
-// Club metadata is baked in for now; later this can come from a /clubs list endpoint.
-// `logo` points at a file in frontend/public/clubs/ (falls back to `initials` if
-// missing). `sessions` are the club's practice/challenge times.
+// The app currently serves a single club. The slug-based backend architecture is
+// kept intact, so standing up another club later is just a matter of seeding it
+// (and adding an entry here). `logo` points at a file in frontend/public/clubs/
+// (falls back to `initials` if missing). `sessions` are the club's practice times.
+export const DEFAULT_CLUB = 'stanmore'
+
 export const KNOWN_CLUBS = [
   {
     slug: 'stanmore',
@@ -68,13 +88,6 @@ export const KNOWN_CLUBS = [
       { days: 'Tue & Thu', time: 'from 8:00pm' },
       { days: 'Sun', time: '10:00am – 1:00pm' },
     ],
-  },
-  {
-    slug: 'york-gardens',
-    name: 'York Gardens TTC',
-    initials: 'YG',
-    logo: null,
-    sessions: [{ days: 'Mon, Wed & Fri', time: 'from 6:30pm' }],
   },
 ]
 

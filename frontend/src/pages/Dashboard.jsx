@@ -6,6 +6,7 @@ import Leaderboard from '../components/Leaderboard.jsx'
 import NoticeBoard from '../components/NoticeBoard.jsx'
 import RecentMatches from '../components/RecentMatches.jsx'
 import SessionTimes from '../components/SessionTimes.jsx'
+import ScoringInfo from '../components/ScoringInfo.jsx'
 import ClubBadge from '../components/ClubBadge.jsx'
 
 export default function Dashboard() {
@@ -33,7 +34,7 @@ export default function Dashboard() {
           <p className="mt-1 text-sm text-table/60">
             No club with slug “{slug}”. It may not be seeded yet.
           </p>
-          <Link to="/" className="btn-primary mt-4">Back to clubs</Link>
+          <Link to="/" className="btn-primary mt-4">Back home</Link>
         </div>
       </Shell>
     )
@@ -65,13 +66,17 @@ export default function Dashboard() {
             <div className="text-xs text-table/50">Win to raise your Elo</div>
           </div>
         </div>
-        <div className="card flex items-center gap-3 p-4">
-          <span className="text-2xl" aria-hidden>🏅</span>
+        <Link
+          to={`/${slug}/tournaments`}
+          className="card group flex items-center gap-3 p-4 transition hover:-translate-y-0.5 hover:shadow-lg"
+        >
+          <span className="text-2xl" aria-hidden>🏆</span>
           <div className="min-w-0">
-            <div className="font-semibold text-table">Top 3 get medals</div>
-            <div className="text-xs text-table/50">Gold, silver, bronze</div>
+            <div className="font-semibold text-table">Tournaments</div>
+            <div className="text-xs text-table/50">Compete for a rating prize</div>
           </div>
-        </div>
+          <span className="ml-auto text-ball transition group-hover:translate-x-1">→</span>
+        </Link>
       </div>
 
       <div className="grid gap-5 lg:grid-cols-[1.1fr_0.9fr]">
@@ -87,6 +92,7 @@ export default function Dashboard() {
             <NoticeBoard slug={slug} requests={requests.data || []} />
           )}
           <SessionTimes club={known} />
+          <ScoringInfo />
         </div>
       </div>
 
