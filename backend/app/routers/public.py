@@ -1,4 +1,7 @@
 """Public (unauthenticated) endpoints."""
+import os
+from datetime import datetime, timedelta, timezone
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -30,8 +33,17 @@ def leaderboard(club: Club = Depends(get_club), db: Session = Depends(get_db)):
         # Rated players ranked first; unrated ("–") sink to the bottom.
         .order_by(Player.unrated.asc(), Player.elo.desc(), Player.wins.desc())
     ).all()
+
+    # Keep the ladder fresh: a player shows only if they've played within the
+    # window OR were added recently (grace so newcomers appear before their first
+    # game). Someone who's gone quiet drops off — and reappears the moment they
+    # play again. Admins still see everyone via the admin endpoints.
+    cutoff = datetime.now(timezone.utc) - timedelta(days=_stale_days())
+    last_played = _last_played_map(db, club.id)
+
+    fresh = [p for p in players if _is_fresh(p, last_played.get(p.id), cutoff)]
     return [
-        LeaderboardEntry(rank=i + 1, **_player_dict(p)) for i, p in enumerate(players)
+        LeaderboardEntry(rank=i + 1, **_player_dict(p)) for i, p in enumerate(fresh)
     ]
 
 
@@ -109,6 +121,35 @@ def cancel_match_request(
 
 
 # ---- helpers ----
+
+def _stale_days() -> int:
+    return int(os.getenv("LADDER_STALE_DAYS", "90"))
+
+
+def _as_utc(dt: datetime) -> datetime:
+    """SQLite returns naive datetimes; treat them as UTC for comparisons."""
+    return dt if dt.tzinfo else dt.replace(tzinfo=timezone.utc)
+
+
+def _last_played_map(db: Session, club_id: str) -> dict[str, datetime]:
+    rows = db.execute(
+        select(Match.winner_id, Match.loser_id, Match.played_at).where(
+            Match.club_id == club_id
+        )
+    ).all()
+    last: dict[str, datetime] = {}
+    for winner_id, loser_id, played_at in rows:
+        for pid in (winner_id, loser_id):
+            if pid not in last or played_at > last[pid]:
+                last[pid] = played_at
+    return last
+
+
+def _is_fresh(p: Player, last_played: datetime | None, cutoff: datetime) -> bool:
+    if last_played is not None and _as_utc(last_played) >= cutoff:
+        return True
+    return _as_utc(p.created_at) >= cutoff
+
 
 def _player_dict(p: Player) -> dict:
     return {
