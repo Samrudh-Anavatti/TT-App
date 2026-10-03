@@ -1,7 +1,7 @@
-"""Seed the clubs on first boot (runs only when the database is empty).
+"""Ensure every club in `_CLUBS` exists (creates missing ones; never touches existing).
 
 Admin PINs come from environment variables — set them as App Service application
-settings (STANMORE_PIN). The `default_pin` values below are throwaway placeholders
+settings (STANMORE_PIN, YORKGARDENS_PIN). The `default_pin` values below are throwaway placeholders
 and must NOT be treated as real secrets (this repo is public).
 
 Clubs start with no players; add real players via the admin panel.
@@ -16,21 +16,30 @@ from .security import hash_pin, verify_pin
 
 _CLUBS = [
     {"name": "Stanmore TTC", "slug": "stanmore", "pin_env": "STANMORE_PIN", "default_pin": "changeme"},
+    {"name": "York Gardens TTC", "slug": "york-gardens", "pin_env": "YORKGARDENS_PIN", "default_pin": "changeme"},
 ]
 
 
 def seed_if_empty() -> None:
+    """Create any club in `_CLUBS` that isn't in the DB yet (idempotent).
+
+    Safe on a populated DB: existing clubs (and their data) are left alone, so
+    adding a club to `_CLUBS` and redeploying is enough to stand it up.
+    """
     db = SessionLocal()
     try:
-        if db.scalar(select(Club).limit(1)) is not None:
-            return  # already seeded
-
+        existing = set(db.scalars(select(Club.slug)).all())
+        created = []
         for spec in _CLUBS:
+            if spec["slug"] in existing:
+                continue
             pin = os.getenv(spec["pin_env"], spec["default_pin"])
             db.add(Club(name=spec["name"], slug=spec["slug"], admin_pin_hash=hash_pin(pin)))
+            created.append(spec["slug"])
 
-        db.commit()
-        print(f"[seed] Clubs created: {', '.join(c['slug'] for c in _CLUBS)}")
+        if created:
+            db.commit()
+            print(f"[seed] Clubs created: {', '.join(created)}")
     finally:
         db.close()
 

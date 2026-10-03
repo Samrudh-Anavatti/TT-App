@@ -72,11 +72,11 @@ export const api = {
     request(`/clubs/${slug}/admin/tournaments/${id}/complete`, { method: 'POST', pin }),
 }
 
-// The app currently serves a single club. The slug-based backend architecture is
-// kept intact, so standing up another club later is just a matter of seeding it
-// (and adding an entry here). `logo` points at a file in frontend/public/clubs/
+// Each deployment presents a single club, chosen at build time via
+// VITE_DEFAULT_CLUB (defaults to stanmore). The backend is shared and slug-based,
+// so a new club is just a seed entry plus an entry here. `logo` points at a file in frontend/public/clubs/
 // (falls back to `initials` if missing). `sessions` are the club's practice times.
-export const DEFAULT_CLUB = 'stanmore'
+export const DEFAULT_CLUB = import.meta.env.VITE_DEFAULT_CLUB || 'stanmore'
 
 export const KNOWN_CLUBS = [
   {
@@ -88,6 +88,13 @@ export const KNOWN_CLUBS = [
       { days: 'Tue & Thu', time: 'from 8:00pm' },
       { days: 'Sun', time: '10:00am – 1:00pm' },
     ],
+  },
+  {
+    slug: 'york-gardens',
+    name: 'York Gardens TTC',
+    initials: 'YG',
+    logo: `${import.meta.env.BASE_URL}clubs/york-gardens.png`,
+    sessions: [],
   },
 ]
 
