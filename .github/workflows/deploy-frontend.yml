@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - 'frontend/**'
+      - 'site/**'
       - '.github/workflows/deploy-frontend.yml'
   workflow_dispatch:
 
@@ -47,9 +48,22 @@ jobs:
           VITE_API_URL: ${{ vars.VITE_API_URL }}
         run: npm run build
 
+      # Assemble the Pages site. An optional top-level `site/` folder (a club's own
+      # static website) forms the root, and the app goes in the APP_DIR repo
+      # variable's subfolder (unset → root). Keep VITE_BASE in step: APP_DIR
+      # "rankings" ↔ VITE_BASE "/rankings/".
+      - name: Assemble site
+        working-directory: .
+        env:
+          APP_DIR: ${{ vars.APP_DIR }}
+        run: |
+          mkdir -p "_site/$APP_DIR"
+          if [ -d site ]; then cp -r site/. _site/; fi
+          cp -r frontend/dist/. "_site/$APP_DIR"
+
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: frontend/dist
+          path: _site
 
   deploy:
     needs: build

@@ -94,7 +94,7 @@ export const KNOWN_CLUBS = [
     name: 'York Gardens TTC',
     initials: 'YG',
     logo: `${import.meta.env.BASE_URL}clubs/york-gardens.png`,
-    sessions: [],
+    sessions: [{ days: 'Mon, Wed & Fri', time: '7:00pm – 11:00pm' }],
   },
 ]
 
