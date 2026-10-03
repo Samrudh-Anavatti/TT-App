@@ -4,21 +4,26 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Table tennis palette: the table, the ball, the net.
+        // Table tennis palette: the table, the ball, the net. Values are CSS
+        // variables (RGB channels, so `/opacity` modifiers work) defined per club
+        // theme in index.css.
         table: {
-          DEFAULT: '#0b3d2e', // deep table green
-          light: '#155c44',
+          DEFAULT: 'rgb(var(--c-table) / <alpha-value>)',
+          light: 'rgb(var(--c-table-light) / <alpha-value>)',
         },
-        felt: '#0f4d38',
-        court: '#0d3b66', // deep blue
-        ball: '#ff6b35', // orange ball
-        chalk: '#f7f7f2', // warm neutral background
+        felt: 'rgb(var(--c-felt) / <alpha-value>)',
+        court: 'rgb(var(--c-court) / <alpha-value>)',
+        ball: {
+          DEFAULT: 'rgb(var(--c-ball) / <alpha-value>)',
+          dark: 'rgb(var(--c-ball-dark) / <alpha-value>)',
+        },
+        chalk: 'rgb(var(--c-chalk) / <alpha-value>)',
       },
       fontFamily: {
         sans: ['Inter', 'system-ui', 'Segoe UI', 'sans-serif'],
       },
       boxShadow: {
-        card: '0 1px 3px rgba(11,61,46,0.08), 0 8px 24px rgba(11,61,46,0.06)',
+        card: '0 1px 3px rgb(var(--c-table) / 0.08), 0 8px 24px rgb(var(--c-table) / 0.06)',
       },
       keyframes: {
         'slide-up': {

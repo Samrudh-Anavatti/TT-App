@@ -6,10 +6,33 @@
   color-scheme: light;
 }
 
+/* Club colour themes (RGB channels). The build's default club picks one via
+   <html data-theme> (see main.jsx). Stanmore: green table, orange ball. */
+:root {
+  --c-table: 11 61 46; /* #0b3d2e */
+  --c-table-light: 21 92 68; /* #155c44 */
+  --c-felt: 15 77 56; /* #0f4d38 */
+  --c-court: 13 59 102; /* #0d3b66 */
+  --c-ball: 255 107 53; /* #ff6b35 */
+  --c-ball-dark: 234 88 12; /* #ea580c */
+  --c-chalk: 247 247 242; /* #f7f7f2 */
+}
+
+/* York Gardens: blue tournament table, magenta ball. */
+:root[data-theme='york-gardens'] {
+  --c-table: 20 40 75; /* #14284b */
+  --c-table-light: 31 61 110; /* #1f3d6e */
+  --c-felt: 26 51 96; /* #1a3360 */
+  --c-court: 15 118 110; /* #0f766e */
+  --c-ball: 214 51 108; /* #d6336c */
+  --c-ball-dark: 176 35 88; /* #b02358 */
+  --c-chalk: 244 246 250; /* #f4f6fa */
+}
+
 body {
   @apply bg-chalk text-table antialiased;
-  background-image: radial-gradient(circle at 100% 0%, rgba(255, 107, 53, 0.06), transparent 40%),
-    radial-gradient(circle at 0% 100%, rgba(13, 59, 102, 0.06), transparent 40%);
+  background-image: radial-gradient(circle at 100% 0%, rgb(var(--c-ball) / 0.06), transparent 40%),
+    radial-gradient(circle at 0% 100%, rgb(var(--c-court) / 0.06), transparent 40%);
   min-height: 100vh;
 }
 
@@ -22,7 +45,7 @@ body {
       focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed;
   }
   .btn-primary {
-    @apply btn bg-ball text-white hover:bg-orange-600 focus:ring-ball;
+    @apply btn bg-ball text-white hover:bg-ball-dark focus:ring-ball;
   }
   .btn-ghost {
     @apply btn bg-table/5 text-table hover:bg-table/10 focus:ring-table;
