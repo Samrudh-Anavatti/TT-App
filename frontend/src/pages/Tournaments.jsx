@@ -1,9 +1,8 @@
 import { useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import { api, getClubMeta } from '../api.js'
+import { api } from '../api.js'
 import { useApi } from '../hooks/useApi.js'
-import Shell from '../components/Shell.jsx'
-import ClubBadge from '../components/ClubBadge.jsx'
+import Shell, { SkeletonPanel } from '../components/Shell.jsx'
 
 // Read-only helper: the admin PIN (if the admin unlocked it this session) lets
 // tournament management controls appear inline. Not security — the backend
@@ -14,61 +13,47 @@ function useAdminPin(slug) {
 
 export default function Tournaments() {
   const { slug } = useParams()
-  const known = getClubMeta(slug)
   const pin = useAdminPin(slug)
   const tournaments = useApi(() => api.getTournaments(slug), [slug])
 
   return (
     <Shell
-      title={known?.name || slug}
-      subtitle="Tournaments"
-      badge={known && <ClubBadge club={known} />}
-      right={
-        <Link to={`/${slug}`} className="btn-ghost !bg-white/10 !text-white hover:!bg-white/20">
-          ← Back
-        </Link>
-      }
+      slug={slug}
+      heading="Tournaments"
+      intro="Run an event, feed in results as they happen, and the winner takes a rating prize."
     >
-      <div className="mx-auto max-w-2xl space-y-5">
-        <div className="flex items-end justify-between gap-3">
-          <div>
-            <h1 className="text-2xl font-extrabold tracking-tight text-table">Tournaments</h1>
-            <p className="mt-1 text-sm text-table/55">
-              Run an event, feed in results as they happen, and the winner takes a rating prize.
-            </p>
-          </div>
-        </div>
-
+      <div className="max-w-3xl space-y-5">
         {pin && <CreateTournament slug={slug} pin={pin} onCreated={tournaments.reload} />}
 
         {tournaments.loading ? (
-          <div className="card h-32 animate-pulse" />
+          <SkeletonPanel rows={3} title={false} />
         ) : tournaments.error ? (
-          <p className="text-sm text-ball">Couldn’t load tournaments.</p>
+          <p role="alert" className="panel px-5 py-4 text-sm font-medium text-ball-dark">
+            Can’t load tournaments right now. Refresh the page to try again.
+          </p>
         ) : (tournaments.data || []).length === 0 ? (
-          <div className="card p-8 text-center text-table/55">
-            No tournaments yet.{pin ? ' Create one above.' : ' Check back soon.'}
+          <div className="panel px-5 py-10 text-center">
+            <p className="font-semibold">No tournaments yet</p>
+            <p className="mt-1 text-sm text-muted">
+              {pin ? 'Create one above to get started.' : 'When the club runs one, it’ll be listed here.'}
+            </p>
           </div>
         ) : (
-          <ul className="space-y-3">
+          <ul className="panel divide-y divide-ink/5 overflow-hidden">
             {tournaments.data.map((t) => (
               <li key={t.id}>
                 <Link
                   to={`/${slug}/tournaments/${t.id}`}
-                  className="card group flex items-center gap-3 p-5 transition hover:-translate-y-0.5 hover:shadow-lg"
+                  className="group grid grid-cols-[1fr_auto] items-center gap-4 px-5 py-4 transition hover:bg-ink/[0.03]"
                 >
-                  <span className="text-2xl" aria-hidden>🏆</span>
                   <div className="min-w-0">
-                    <div className="font-bold text-table">{t.name}</div>
-                    <div className="text-xs text-table/50">
-                      {t.participant_count} player{t.participant_count === 1 ? '' : 's'} · prize +{t.rating_prize}
-                      {t.status === 'completed' && t.winner_name && (
-                        <> · 🥇 {t.winner_name}</>
-                      )}
+                    <div className="truncate text-lg font-bold group-hover:underline group-hover:underline-offset-2">{t.name}</div>
+                    <div className="mt-0.5 text-sm text-muted">
+                      {t.participant_count} player{t.participant_count === 1 ? '' : 's'}, winner gets +{t.rating_prize}
+                      {t.status === 'completed' && t.winner_name && <>. Won by {t.winner_name}</>}
                     </div>
                   </div>
-                  <StatusPill status={t.status} className="ml-auto" />
-                  <span className="text-ball transition group-hover:translate-x-1">→</span>
+                  <StatusPill status={t.status} />
                 </Link>
               </li>
             ))}
@@ -82,12 +67,9 @@ export default function Tournaments() {
 function StatusPill({ status, className = '' }) {
   const done = status === 'completed'
   return (
-    <span
-      className={`rounded-full px-2.5 py-0.5 text-xs font-bold ${
-        done ? 'bg-table/10 text-table/60' : 'bg-emerald-100 text-emerald-700'
-      } ${className}`}
-    >
-      {done ? 'Completed' : 'Active'}
+    <span className={`inline-flex items-center gap-1.5 text-sm font-semibold ${done ? 'text-muted' : 'text-table'} ${className}`}>
+      <span aria-hidden className={`h-2 w-2 rounded-full ${done ? 'bg-muted/50' : 'bg-ball'}`} />
+      {done ? 'Finished' : 'In progress'}
     </span>
   )
 }
@@ -115,14 +97,16 @@ function CreateTournament({ slug, pin, onCreated }) {
   }
 
   return (
-    <section className="card p-6">
-      <h2 className="flex items-center gap-2 font-extrabold tracking-tight text-table">
-        <span aria-hidden>➕</span> New tournament
-      </h2>
-      <form onSubmit={submit} className="mt-4 grid gap-3 sm:grid-cols-[1fr_auto_auto] sm:items-end">
+    <section className="panel overflow-hidden">
+      <div className="panel-head">
+        <h2 className="panel-title">New tournament</h2>
+        <span className="text-sm text-muted">Admin</span>
+      </div>
+      <form onSubmit={submit} className="grid gap-3 p-5 sm:grid-cols-[1fr_auto_auto] sm:items-end">
         <div>
-          <label className="label">Name</label>
+          <label className="label" htmlFor="t-name">Name</label>
           <input
+            id="t-name"
             className="input"
             maxLength={120}
             placeholder="Winter Ladder"
@@ -132,9 +116,10 @@ function CreateTournament({ slug, pin, onCreated }) {
           />
         </div>
         <div>
-          <label className="label">Winner prize</label>
+          <label className="label" htmlFor="t-prize">Winner prize</label>
           <input
-            className="input w-28"
+            id="t-prize"
+            className="input sm:w-28"
             type="number"
             min={0}
             max={500}
@@ -143,10 +128,10 @@ function CreateTournament({ slug, pin, onCreated }) {
           />
         </div>
         <button type="submit" className="btn-primary" disabled={busy || !name.trim()}>
-          {busy ? 'Creating…' : 'Create'}
+          {busy ? 'Creating…' : 'Create tournament'}
         </button>
       </form>
-      {error && <p className="mt-2 text-sm text-ball">{error.message}</p>}
+      {error && <p role="alert" className="field-error px-5 pb-4">{error.message}</p>}
     </section>
   )
 }

@@ -60,16 +60,20 @@ export default function ManagePlayers({ slug, pin, players, onChange }) {
   }
 
   return (
-    <section className="card p-6">
-      <h2 className="mb-4 font-extrabold tracking-tight text-table">Manage Players</h2>
+    <section className="panel overflow-hidden" aria-labelledby="players-title">
+      <div className="panel-head">
+        <h2 id="players-title" className="panel-title">Players</h2>
+        <span className="text-sm text-muted">{players.filter((p) => p.active).length} active</span>
+      </div>
 
+      <div className="p-5">
       {needsRating.length > 0 && (
-        <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 p-4">
-          <p className="text-sm font-bold text-amber-800">
-            ⏳ {needsRating.length} player{needsRating.length === 1 ? '' : 's'} need a rating
+        <div className="mb-5 rounded-md border border-ball/35 bg-ball/[0.07] p-4">
+          <p className="font-semibold">
+            {needsRating.length} player{needsRating.length === 1 ? ' needs' : 's need'} a rating
           </p>
-          <p className="mt-0.5 text-xs text-amber-700/80">
-            Set one so they’re ranked on the board and can play matches.
+          <p className="mt-0.5 text-sm text-ink/75">
+            Set one so they’re ranked on the ladder and can play recorded matches.
           </p>
           <ul className="mt-3 space-y-2">
             {needsRating.map((p) => (
@@ -84,11 +88,13 @@ export default function ManagePlayers({ slug, pin, players, onChange }) {
         </div>
       )}
 
-      <form onSubmit={addPlayer} className="mb-4 space-y-2">
+      <form onSubmit={addPlayer} className="space-y-2">
+        <label className="label" htmlFor="new-player">Add a player</label>
         <div className="flex flex-wrap gap-2">
           <input
+            id="new-player"
             className="input min-w-[8rem] flex-1"
-            placeholder="New player name"
+            placeholder="Full name"
             value={newName}
             onChange={(e) => setNewName(e.target.value)}
           />
@@ -96,36 +102,40 @@ export default function ManagePlayers({ slug, pin, players, onChange }) {
             type="number"
             min={100}
             max={4000}
-            className="input w-28 shrink-0 disabled:opacity-40"
-            title="Starting ELO"
-            placeholder={newUnrated ? '—' : 'ELO'}
+            className="input w-28 shrink-0"
+            title="Starting Elo"
+            aria-label="Starting Elo"
+            placeholder={newUnrated ? '–' : 'Elo'}
             value={newUnrated ? '' : newElo}
             disabled={newUnrated}
             onChange={(e) => setNewElo(e.target.value)}
           />
           <button type="submit" className="btn-primary shrink-0" disabled={busy || !newName.trim()}>
-            + Add
+            Add player
           </button>
         </div>
-        <label className="flex items-center gap-2 text-sm text-table/60">
+        <label className="flex min-h-[2.25rem] items-center gap-2 text-sm text-ink/80">
           <input
             type="checkbox"
+            className="h-4 w-4 accent-[rgb(var(--c-table))]"
             checked={newUnrated}
             onChange={(e) => setNewUnrated(e.target.checked)}
           />
-          No rating yet — a coach will set it later
+          No rating yet. A coach will set it later.
         </label>
       </form>
 
-      {error && <p className="mb-3 text-sm text-ball">{error.message}</p>}
+      {error && <p role="alert" className="field-error mt-3">{error.message}</p>}
+      </div>
 
-      <ul className="divide-y divide-black/5">
+      <ul className="divide-y divide-ink/5 border-t border-ink/10">
         {players.map((p) => (
-          <li key={p.id} className="flex flex-wrap items-center gap-2 py-2.5">
+          <li key={p.id} className="flex flex-wrap items-center gap-2 px-5 py-2">
             {editingId === p.id ? (
               <>
                 <input
-                  className="input min-w-[8rem] flex-1 py-1.5"
+                  className="input min-h-[2.25rem] min-w-[8rem] flex-1"
+                  aria-label="Player name"
                   value={editName}
                   autoFocus
                   onChange={(e) => setEditName(e.target.value)}
@@ -135,36 +145,35 @@ export default function ManagePlayers({ slug, pin, players, onChange }) {
                     type="number"
                     min={100}
                     max={4000}
-                    className="input w-24 shrink-0 py-1.5"
-                    title="ELO"
+                    className="input min-h-[2.25rem] w-24 shrink-0"
+                    title="Elo"
+                    aria-label="Elo"
                     value={editElo}
                     onChange={(e) => setEditElo(e.target.value)}
                   />
                 )}
-                <button className="btn-ghost py-1.5" onClick={() => saveEdit(p.id)} disabled={busy}>
+                <button className="btn-primary min-h-[2.25rem] px-3 text-sm" onClick={() => saveEdit(p.id)} disabled={busy}>
                   Save
                 </button>
-                <button className="btn-ghost py-1.5" onClick={() => setEditingId(null)}>
+                <button className="btn-quiet" onClick={() => setEditingId(null)}>
                   Cancel
                 </button>
               </>
             ) : (
               <>
-                <span className={`flex-1 font-medium ${p.active ? 'text-table' : 'text-table/40 line-through'}`}>
-                  {p.name}{' '}
-                  <span className="font-mono text-sm text-table/40">
-                    {p.unrated ? '(unrated)' : `(${p.elo})`}
+                <span className={`min-w-0 flex-1 ${p.active ? '' : 'text-muted'}`}>
+                  <span className="font-medium">{p.name}</span>{' '}
+                  <span className="text-sm tabular-nums text-muted">
+                    {p.unrated ? 'unrated' : p.elo}
+                    {!p.active && ', inactive'}
                   </span>
                 </span>
-                <button
-                  className="text-sm font-semibold text-table/60 hover:text-table"
-                  onClick={() => startEdit(p)}
-                >
+                <button className="btn-quiet" onClick={() => startEdit(p)}>
                   Edit
                 </button>
                 {p.active ? (
                   <button
-                    className="text-sm font-semibold text-ball/80 hover:text-ball"
+                    className="btn-quiet hover:text-ball-dark"
                     onClick={() => run(() => api.deactivatePlayer(slug, pin, p.id))}
                     disabled={busy}
                   >
@@ -172,7 +181,7 @@ export default function ManagePlayers({ slug, pin, players, onChange }) {
                   </button>
                 ) : (
                   <button
-                    className="text-sm font-semibold text-emerald-600 hover:text-emerald-700"
+                    className="btn-quiet text-table"
                     onClick={() => run(() => api.updatePlayer(slug, pin, p.id, { active: true }))}
                     disabled={busy}
                   >
@@ -191,18 +200,19 @@ export default function ManagePlayers({ slug, pin, players, onChange }) {
 function NeedsRatingRow({ player, onSet, busy }) {
   const [elo, setElo] = useState('1000')
   return (
-    <li className="flex items-center gap-2">
-      <span className="flex-1 truncate font-medium text-amber-900">{player.name}</span>
+    <li className="flex flex-wrap items-center gap-2">
+      <span className="min-w-0 basis-full truncate font-medium sm:basis-auto sm:flex-1">{player.name}</span>
       <input
         type="number"
         min={100}
         max={4000}
-        className="input w-24 py-1.5"
+        aria-label={`Rating for ${player.name}`}
+        className="input min-h-[2.25rem] w-24"
         value={elo}
         onChange={(e) => setElo(e.target.value)}
       />
       <button
-        className="btn-primary py-1.5"
+        className="btn-primary min-h-[2.25rem] px-3 text-sm"
         disabled={busy || !elo}
         onClick={() => onSet(Number(elo))}
       >

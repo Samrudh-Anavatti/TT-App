@@ -1,29 +1,30 @@
 /** @type {import('tailwindcss').Config} */
+
+// Colours are CSS variables (RGB channels, so `/opacity` modifiers work) defined
+// per club theme in index.css.
+const v = (name) => `rgb(var(--c-${name}) / <alpha-value>)`
+
 export default {
   content: ['./index.html', './src/**/*.{js,jsx}'],
   theme: {
     extend: {
       colors: {
-        // Table tennis palette: the table, the ball, the net. Values are CSS
-        // variables (RGB channels, so `/opacity` modifiers work) defined per club
-        // theme in index.css.
-        table: {
-          DEFAULT: 'rgb(var(--c-table) / <alpha-value>)',
-          light: 'rgb(var(--c-table-light) / <alpha-value>)',
-        },
-        felt: 'rgb(var(--c-felt) / <alpha-value>)',
-        court: 'rgb(var(--c-court) / <alpha-value>)',
-        ball: {
-          DEFAULT: 'rgb(var(--c-ball) / <alpha-value>)',
-          dark: 'rgb(var(--c-ball-dark) / <alpha-value>)',
-        },
-        chalk: 'rgb(var(--c-chalk) / <alpha-value>)',
+        // The world of the club hall: the table top, its painted lines, the ball.
+        table: { DEFAULT: v('table'), light: v('table-light') },
+        chalk: v('chalk'), // painted table lines; text on the table
+        ball: { DEFAULT: v('ball'), dark: v('ball-dark') }, // the one accent; `dark` is for text
+        'on-ball': v('on-ball'), // text on a ball-coloured fill
+        hall: v('hall'), // page background
+        paper: v('paper'), // panel surface
+        ink: v('ink'), // body text
+        muted: v('muted'), // secondary text
       },
       fontFamily: {
-        sans: ['Inter', 'system-ui', 'Segoe UI', 'sans-serif'],
+        sans: ['Archivo', 'system-ui', 'Segoe UI', 'sans-serif'],
       },
       boxShadow: {
-        card: '0 1px 3px rgb(var(--c-table) / 0.08), 0 8px 24px rgb(var(--c-table) / 0.06)',
+        // Tinted to the table, light from above.
+        lift: '0 1px 0 rgb(var(--c-table) / 0.06), 0 6px 18px -8px rgb(var(--c-table) / 0.25)',
       },
       keyframes: {
         'slide-up': {
@@ -32,7 +33,7 @@ export default {
         },
       },
       animation: {
-        'slide-up': 'slide-up 0.35s ease-out both',
+        'slide-up': 'slide-up 0.3s cubic-bezier(0.2, 0.8, 0.2, 1) both',
       },
     },
   },

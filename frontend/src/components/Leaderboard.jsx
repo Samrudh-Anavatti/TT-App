@@ -1,11 +1,11 @@
 import { useState } from 'react'
 
-const MEDALS = { 1: '🥇', 2: '🥈', 3: '🥉' }
 const COLLAPSED_COUNT = 10
 
-function winRate(p) {
-  if (!p.matches_played) return '—'
-  return `${Math.round((p.wins / p.matches_played) * 100)}%`
+function record(p) {
+  if (!p.matches_played) return 'No matches yet'
+  const pct = Math.round((p.wins / p.matches_played) * 100)
+  return `${p.wins} won, ${p.losses} lost (${pct}%)`
 }
 
 export default function Leaderboard({ players = [] }) {
@@ -14,83 +14,74 @@ export default function Leaderboard({ players = [] }) {
   const visible = expanded || !canCollapse ? players : players.slice(0, COLLAPSED_COUNT)
 
   return (
-    <section className="card overflow-hidden">
-      <div className="flex items-center justify-between border-b border-black/5 px-5 py-4">
-        <h2 className="flex items-center gap-2 font-extrabold tracking-tight text-table">
-          <span aria-hidden>🏓</span> Leaderboard
-        </h2>
-        <span className="text-xs font-semibold uppercase tracking-wide text-table/40">
+    <section className="panel overflow-hidden" aria-labelledby="ladder-title">
+      <div className="panel-head">
+        <h2 id="ladder-title" className="panel-title">Rankings</h2>
+        <span className="text-sm text-muted">
           {players.length} {players.length === 1 ? 'player' : 'players'}
         </span>
       </div>
 
       {players.length === 0 ? (
-        <p className="px-5 py-10 text-center text-sm text-table/50">
-          No players on the board yet. Ask an admin to add the roster. 🏓
-        </p>
+        <div className="px-5 py-8">
+          <p className="font-semibold">No one’s on the ladder yet</p>
+          <p className="mt-1 text-sm text-muted">An admin adds players from the Admin tab.</p>
+        </div>
       ) : (
         <>
-          <ul className="divide-y divide-black/5">
-          {visible.map((p) => {
-            const medal = p.unrated ? null : MEDALS[p.rank]
-            const isChamp = p.rank === 1 && !p.unrated
-            return (
-              <li
-                key={p.id}
-                className={`flex items-center gap-3 px-5 py-3 transition hover:bg-chalk/60 ${
-                  isChamp ? 'bg-amber-50/70' : ''
-                }`}
-              >
-                <span className="grid h-9 w-9 shrink-0 place-items-center">
-                  {medal ? (
-                    <span className="text-2xl leading-none" title={`Rank ${p.rank}`}>
-                      {medal}
-                    </span>
-                  ) : (
-                    <span className="grid h-8 w-8 place-items-center rounded-full bg-table/5 text-sm font-bold text-table/60">
-                      {p.rank}
-                    </span>
-                  )}
-                </span>
-
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2">
-                    <span className="truncate font-semibold text-table">{p.name}</span>
-                    {isChamp && (
-                      <span className="rounded-full bg-amber-400/20 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-amber-600">
-                        Champ
-                      </span>
-                    )}
-                  </div>
-                  <div className="text-xs text-table/45">
-                    {p.wins}W · {p.losses}L · {winRate(p)} win rate
-                  </div>
-                </div>
-
-                <div className="text-right leading-none">
-                  <div
-                    className={`font-mono text-lg font-bold tabular-nums ${
-                      p.unrated ? 'text-table/30' : 'text-table'
+          <div className="grid grid-cols-[2.75rem_1fr_auto] gap-3 border-b border-ink/5 px-5 py-2 text-xs font-medium text-muted">
+            <span>Rank</span>
+            <span>Player</span>
+            <span className="text-right">Elo</span>
+          </div>
+          <ol>
+            {visible.map((p) => {
+              const leader = p.rank === 1 && !p.unrated
+              return (
+                <li
+                  key={p.id}
+                  className={`relative grid grid-cols-[2.75rem_1fr_auto] items-center gap-3 border-b border-ink/5 px-5 py-3 last:border-b-0 ${
+                    leader ? 'bg-ball/[0.07]' : ''
+                  }`}
+                >
+                  {leader && <span aria-hidden className="absolute inset-y-0 left-0 w-1 bg-ball" />}
+                  <span
+                    className={`num text-[1.6rem] leading-none ${
+                      leader ? 'text-ball-dark' : p.unrated ? 'text-muted/50' : 'text-ink/45'
                     }`}
-                    title={p.unrated ? 'Awaiting a rating from a coach' : undefined}
+                  >
+                    {p.unrated ? '–' : p.rank}
+                  </span>
+
+                  <div className="min-w-0">
+                    <div className="flex items-baseline gap-2">
+                      <span className="truncate font-semibold">{p.name}</span>
+                      {leader && <span className="hidden shrink-0 text-xs font-semibold text-ball-dark sm:inline">Leader</span>}
+                    </div>
+                    <div className="text-[0.82rem] text-muted">
+                      {p.unrated ? 'Awaiting a rating from a coach' : record(p)}
+                    </div>
+                  </div>
+
+                  <span
+                    className={`num text-right text-[1.6rem] leading-none ${p.unrated ? 'text-muted/50' : ''}`}
+                    title={p.unrated ? 'Unrated' : undefined}
                   >
                     {p.unrated ? '–' : p.elo}
-                  </div>
-                  <div className="mt-0.5 text-[10px] font-semibold uppercase tracking-wider text-table/35">
-                    {p.unrated ? 'Unrated' : 'Elo'}
-                  </div>
-                </div>
-              </li>
-            )
-          })}
-          </ul>
+                    {p.unrated && <span className="sr-only">Unrated</span>}
+                  </span>
+                </li>
+              )
+            })}
+          </ol>
           {canCollapse && (
             <button
               type="button"
               onClick={() => setExpanded((v) => !v)}
-              className="w-full border-t border-black/5 px-5 py-3 text-sm font-semibold text-ball transition hover:bg-chalk/60"
+              aria-expanded={expanded}
+              className="w-full border-t border-ink/10 px-5 py-3 text-sm font-semibold text-ball-dark transition hover:bg-ink/[0.03]"
             >
-              {expanded ? 'Show fewer ↑' : `Show all ${players.length} players ↓`}
+              {expanded ? 'Show top 10 only' : `Show all ${players.length} players`}
             </button>
           )}
         </>

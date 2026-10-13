@@ -1,14 +1,11 @@
 import { useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
-import { KNOWN_CLUBS } from '../api.js'
+import { useParams } from 'react-router-dom'
 import Shell from '../components/Shell.jsx'
 import PinGate from '../components/PinGate.jsx'
 import AdminPanel from '../components/AdminPanel.jsx'
-import ClubBadge from '../components/ClubBadge.jsx'
 
 export default function Admin() {
   const { slug } = useParams()
-  const known = KNOWN_CLUBS.find((c) => c.slug === slug)
   const [pin, setPin] = useState(() => sessionStorage.getItem(`pin:${slug}`) || null)
 
   const lock = () => {
@@ -18,31 +15,12 @@ export default function Admin() {
 
   return (
     <Shell
-      title={`Admin — ${known?.name || slug}`}
-      subtitle={pin ? 'Signed in' : undefined}
-      badge={known && <ClubBadge club={known} />}
-      right={
-        pin ? (
-          <div className="flex gap-2">
-            <button onClick={lock} className="btn-ghost !bg-white/10 !text-white hover:!bg-white/20">
-              Lock
-            </button>
-            <Link to={`/${slug}`} className="btn-ghost !bg-white/10 !text-white hover:!bg-white/20">
-              ← Back
-            </Link>
-          </div>
-        ) : (
-          <Link to={`/${slug}`} className="btn-ghost !bg-white/10 !text-white hover:!bg-white/20">
-            ← Back
-          </Link>
-        )
-      }
+      slug={slug}
+      heading="Admin"
+      intro={pin ? 'Record results, manage the roster and keep an eye on who’s playing.' : undefined}
+      actions={pin && <button onClick={lock} className="btn-table">Lock admin</button>}
     >
-      {pin ? (
-        <AdminPanel slug={slug} pin={pin} />
-      ) : (
-        <PinGate slug={slug} onUnlock={setPin} />
-      )}
+      {pin ? <AdminPanel slug={slug} pin={pin} /> : <PinGate slug={slug} onUnlock={setPin} />}
     </Shell>
   )
 }

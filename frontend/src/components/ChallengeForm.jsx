@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { api } from '../api.js'
 
 export default function ChallengeForm({ slug, players, onDone }) {
@@ -29,10 +30,13 @@ export default function ChallengeForm({ slug, players, onDone }) {
 
   if (status === 'done') {
     return (
-      <div className="card p-8 text-center animate-slide-up">
-        <div className="text-4xl">🏓</div>
-        <p className="mt-3 text-lg font-bold text-table">Challenge posted!</p>
-        <p className="mt-1 text-sm text-table/60">It’s up on the notice board now.</p>
+      <div className="panel animate-slide-up p-6" role="status">
+        <p className="condensed text-3xl font-black">
+          {nameOf(challenger)} <span className="text-ball-dark">v</span> {nameOf(opponent)}
+        </p>
+        <p className="mt-2 font-semibold">Challenge posted</p>
+        <p className="mt-0.5 text-sm text-muted">It’s on the ladder page under open challenges.</p>
+        <Link to={`/${slug}`} className="btn-ghost mt-5">Back to the ladder</Link>
       </div>
     )
   }
@@ -41,68 +45,74 @@ export default function ChallengeForm({ slug, players, onDone }) {
   const ready = challenger && opponent && !sameName
 
   return (
-    <form onSubmit={submit} className="card space-y-5 p-6">
-      <div className="grid gap-3 sm:grid-cols-[1fr_auto_1fr] sm:items-end">
-        <div>
-          <label className="label">Challenger</label>
-          <select className="input" value={challenger} onChange={(e) => setChallenger(e.target.value)} required>
-            <option value="">Select…</option>
-            {players.map((p) => (
-              <option key={p.id} value={p.id}>{p.name}</option>
-            ))}
-          </select>
-        </div>
-        <div className="flex justify-center pb-1 sm:pb-2.5">
-          <span className="grid h-9 w-9 place-items-center rounded-full bg-ball/10 text-xs font-black uppercase tracking-wide text-ball">
-            vs
+    <form onSubmit={submit} className="panel overflow-hidden">
+      <div className="panel-head">
+        <h2 className="panel-title">Who’s playing</h2>
+      </div>
+
+      <div className="space-y-5 p-5 sm:p-6">
+        <div className="grid gap-3 sm:grid-cols-[1fr_auto_1fr] sm:items-end">
+          <div>
+            <label className="label" htmlFor="challenger">Challenger</label>
+            <select id="challenger" className="input" value={challenger} onChange={(e) => setChallenger(e.target.value)} required>
+              <option value="">Choose a player</option>
+              {players.map((p) => (
+                <option key={p.id} value={p.id}>{p.name}</option>
+              ))}
+            </select>
+          </div>
+          <span aria-hidden className="condensed hidden pb-2 text-center text-2xl font-black text-ball-dark sm:block">
+            v
           </span>
+          <div>
+            <label className="label" htmlFor="opponent">Opponent</label>
+            <select id="opponent" className="input" value={opponent} onChange={(e) => setOpponent(e.target.value)} required>
+              <option value="">Choose a player</option>
+              {players.map((p) => (
+                <option key={p.id} value={p.id}>{p.name}</option>
+              ))}
+            </select>
+          </div>
         </div>
+
+        {sameName && <p className="field-error">Pick two different players.</p>}
+
         <div>
-          <label className="label">Opponent</label>
-          <select className="input" value={opponent} onChange={(e) => setOpponent(e.target.value)} required>
-            <option value="">Select…</option>
-            {players.map((p) => (
-              <option key={p.id} value={p.id}>{p.name}</option>
-            ))}
-          </select>
+          <label className="label" htmlFor="message">Message <span className="font-normal text-muted">(optional)</span></label>
+          <input
+            id="message"
+            className="input"
+            maxLength={280}
+            placeholder="Best of 3 on Tuesday?"
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+          />
         </div>
-      </div>
 
-      {ready && (
-        <div className="rounded-xl border border-black/5 bg-chalk/60 px-4 py-3 text-center text-sm animate-slide-up">
-          <span className="font-bold text-table">{nameOf(challenger)}</span>
-          <span className="mx-2" aria-hidden>🏓</span>
-          <span className="font-bold text-table">{nameOf(opponent)}</span>
+        <div>
+          <label className="label" htmlFor="when">Proposed time <span className="font-normal text-muted">(optional)</span></label>
+          <input
+            id="when"
+            type="datetime-local"
+            className="input"
+            value={scheduledFor}
+            onChange={(e) => setScheduledFor(e.target.value)}
+          />
         </div>
-      )}
 
-      <div>
-        <label className="label">Message (optional)</label>
-        <input
-          className="input"
-          maxLength={280}
-          placeholder="Best of 3 on Tuesday?"
-          value={message}
-          onChange={(e) => setMessage(e.target.value)}
-        />
+        {status instanceof Error && <p role="alert" className="field-error">{status.message}</p>}
       </div>
 
-      <div>
-        <label className="label">Proposed time (optional)</label>
-        <input
-          type="datetime-local"
-          className="input"
-          value={scheduledFor}
-          onChange={(e) => setScheduledFor(e.target.value)}
-        />
+      <div className="flex flex-wrap items-center gap-3 border-t border-ink/10 bg-ink/[0.02] px-5 py-4 sm:px-6">
+        <button type="submit" className="btn-primary w-full sm:w-auto" disabled={status === 'saving' || !ready}>
+          {status === 'saving' ? 'Posting…' : 'Post challenge'}
+        </button>
+        {ready && (
+          <span className="animate-slide-up text-sm text-muted">
+            {nameOf(challenger)} v {nameOf(opponent)}
+          </span>
+        )}
       </div>
-
-      {sameName && <p className="text-sm text-ball">Pick two different players.</p>}
-      {status instanceof Error && <p className="text-sm text-ball">{status.message}</p>}
-
-      <button type="submit" className="btn-primary w-full" disabled={status === 'saving' || !ready}>
-        {status === 'saving' ? 'Posting…' : 'Post Challenge'}
-      </button>
     </form>
   )
 }

@@ -20,31 +20,34 @@ export default function PinGate({ slug, onUnlock }) {
   }
 
   return (
-    <div className="mx-auto max-w-sm">
-      <form onSubmit={submit} className="card space-y-4 p-6 text-center">
-        <div className="text-4xl">🔒</div>
+    <form onSubmit={submit} className="panel max-w-md overflow-hidden">
+      <div className="panel-head">
+        <h2 className="panel-title">Unlock admin</h2>
+      </div>
+      <div className="space-y-4 p-5 sm:p-6">
+        <p className="text-sm text-muted">Club coaches and organisers only. Enter the admin PIN to continue.</p>
         <div>
-          <h1 className="text-xl font-extrabold text-table">Admin access</h1>
-          <p className="mt-1 text-sm text-table/60">Enter the club’s admin PIN.</p>
+          <label className="label" htmlFor="pin">Admin PIN</label>
+          <input
+            id="pin"
+            type="password"
+            inputMode="text"
+            autoComplete="current-password"
+            autoFocus
+            className="input text-lg tracking-[0.25em]"
+            value={pin}
+            onChange={(e) => setPin(e.target.value)}
+          />
         </div>
-        <input
-          type="password"
-          inputMode="text"
-          autoFocus
-          className="input text-center text-lg tracking-[0.3em]"
-          placeholder="••••"
-          value={pin}
-          onChange={(e) => setPin(e.target.value)}
-        />
         {status instanceof Error && (
-          <p className="text-sm text-ball">
-            {status.status === 401 ? 'Incorrect PIN.' : status.message}
+          <p role="alert" className="field-error">
+            {status.status === 401 ? 'That PIN isn’t right. Check it and try again.' : status.message}
           </p>
         )}
         <button type="submit" className="btn-primary w-full" disabled={status === 'checking' || !pin}>
           {status === 'checking' ? 'Checking…' : 'Unlock'}
         </button>
-      </form>
-    </div>
+      </div>
+    </form>
   )
 }

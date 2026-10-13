@@ -9,52 +9,169 @@
 /* Club colour themes (RGB channels). The build's default club picks one via
    <html data-theme> (see main.jsx). Stanmore: green table, orange ball. */
 :root {
-  --c-table: 11 61 46; /* #0b3d2e */
-  --c-table-light: 21 92 68; /* #155c44 */
-  --c-felt: 15 77 56; /* #0f4d38 */
-  --c-court: 13 59 102; /* #0d3b66 */
-  --c-ball: 255 107 53; /* #ff6b35 */
-  --c-ball-dark: 234 88 12; /* #ea580c */
-  --c-chalk: 247 247 242; /* #f7f7f2 */
+  --c-table: 14 63 49; /* #0e3f31 */
+  --c-table-light: 22 86 66; /* #165642 */
+  --c-chalk: 244 245 239; /* #f4f5ef painted line */
+  --c-ball: 240 101 31; /* #f0651f */
+  --c-ball-dark: 184 69 12; /* #b8450c accent as text (AA on paper) */
+  --c-on-ball: 17 43 34; /* ink on orange; white fails contrast */
+  --c-hall: 233 237 232; /* #e9ede8 */
+  --c-paper: 251 252 249; /* #fbfcf9 */
+  --c-ink: 17 43 34; /* #112b22 */
+  --c-muted: 88 105 97; /* #586961 */
 }
 
 /* York Gardens: blue tournament table, magenta ball. */
 :root[data-theme='york-gardens'] {
   --c-table: 20 40 75; /* #14284b */
   --c-table-light: 31 61 110; /* #1f3d6e */
-  --c-felt: 26 51 96; /* #1a3360 */
-  --c-court: 15 118 110; /* #0f766e */
-  --c-ball: 214 51 108; /* #d6336c */
-  --c-ball-dark: 176 35 88; /* #b02358 */
   --c-chalk: 244 246 250; /* #f4f6fa */
+  --c-ball: 214 51 108; /* #d6336c */
+  --c-ball-dark: 168 32 84; /* #a82054 */
+  --c-on-ball: 255 255 255;
+  --c-hall: 230 234 242; /* #e6eaf2 */
+  --c-paper: 251 252 254; /* #fbfcfe */
+  --c-ink: 16 27 51; /* #101b33 */
+  --c-muted: 86 98 122; /* #56627a */
 }
 
-body {
-  @apply bg-chalk text-table antialiased;
-  background-image: radial-gradient(circle at 100% 0%, rgb(var(--c-ball) / 0.06), transparent 40%),
-    radial-gradient(circle at 0% 100%, rgb(var(--c-court) / 0.06), transparent 40%);
-  min-height: 100vh;
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply bg-hall text-ink antialiased;
+    min-height: 100dvh;
+    font-feature-settings: 'ss01';
+  }
+  :focus-visible {
+    outline: 2px solid rgb(var(--c-ball));
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+  }
+  p {
+    text-wrap: pretty;
+  }
 }
 
 @layer components {
-  .card {
-    @apply rounded-2xl bg-white shadow-card border border-black/5;
+  /* Flat paper panel. Elevation is reserved for the table masthead. */
+  .panel {
+    @apply rounded-lg border border-ink/10 bg-paper;
   }
+  .panel-head {
+    @apply flex items-baseline justify-between gap-3 border-b border-ink/10 px-5 py-3.5;
+  }
+  .panel-title {
+    @apply text-[1.05rem] font-bold tracking-tight text-ink;
+  }
+
   .btn {
-    @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 font-semibold transition
-      focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply inline-flex min-h-[2.75rem] items-center justify-center gap-2 rounded-md px-4 text-[0.95rem]
+      font-semibold transition duration-150 active:translate-y-px
+      disabled:cursor-not-allowed disabled:opacity-45 disabled:active:translate-y-0;
   }
   .btn-primary {
-    @apply btn bg-ball text-white hover:bg-ball-dark focus:ring-ball;
+    @apply btn bg-ball text-on-ball shadow-[inset_0_-2px_0_rgb(0_0_0/0.15)] hover:brightness-95
+      disabled:bg-ink/10 disabled:text-ink/60 disabled:opacity-100 disabled:shadow-none disabled:hover:brightness-100;
   }
   .btn-ghost {
-    @apply btn bg-table/5 text-table hover:bg-table/10 focus:ring-table;
+    @apply btn border border-ink/15 bg-paper text-ink hover:border-ink/30 hover:bg-white;
   }
+  /* Text-only action for low-emphasis row controls. */
+  .btn-quiet {
+    @apply inline-flex min-h-[2.25rem] items-center rounded px-2 text-sm font-semibold text-muted
+      transition hover:bg-ink/5 hover:text-ink disabled:opacity-45;
+  }
+  /* Button sitting on the table masthead. */
+  .btn-table {
+    @apply btn min-h-[2.5rem] border border-chalk/25 bg-transparent text-chalk hover:border-chalk/60 hover:bg-chalk/10;
+  }
+
   .input {
-    @apply w-full rounded-xl border border-black/10 bg-white px-3 py-2.5 text-table
-      focus:border-table focus:outline-none focus:ring-2 focus:ring-table/20;
+    @apply min-h-[2.75rem] w-full rounded-md border border-ink/20 bg-white px-3 text-ink
+      transition placeholder:text-muted/70 hover:border-ink/35
+      focus:border-table focus:outline-none focus:ring-2 focus:ring-table/20
+      disabled:bg-hall disabled:text-muted;
   }
   .label {
-    @apply block text-sm font-semibold text-table/70 mb-1.5;
+    @apply mb-1.5 block text-sm font-medium text-ink/80;
+  }
+  .field-error {
+    @apply text-sm font-medium text-ball-dark;
+  }
+
+  .skeleton {
+    @apply animate-pulse rounded bg-ink/[0.07];
+  }
+
+  /* Scoreboard numerals: condensed, heavy, tabular. */
+  .num {
+    font-stretch: 72%;
+    font-variant-numeric: tabular-nums;
+    @apply font-extrabold;
+  }
+  .condensed {
+    font-stretch: 72%;
+  }
+
+  /* Masthead: the table top seen from above. */
+  .table-top {
+    @apply relative isolate overflow-hidden bg-table text-chalk;
+    background-image: radial-gradient(120% 140% at 15% 0%, rgb(var(--c-table-light) / 0.55), transparent 60%);
+  }
+  /* Painted edge lines: top and both sides; the table runs on under the tabs. */
+  .table-top::before {
+    content: '';
+    position: absolute;
+    inset: 10px 10px -4px;
+    border: 2px solid rgb(var(--c-chalk) / 0.85);
+    border-bottom: 0;
+    border-radius: 3px 3px 0 0;
+    pointer-events: none;
+    z-index: -1;
+  }
+  /* The net: a white tape with mesh either side. */
+  .table-net {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 18px;
+    z-index: -1;
+    pointer-events: none;
+    background:
+      linear-gradient(rgb(var(--c-chalk) / 0.9), rgb(var(--c-chalk) / 0.9)) center / 3px 100% no-repeat,
+      repeating-linear-gradient(45deg, rgb(var(--c-chalk) / 0.16) 0 1px, transparent 1px 5px),
+      repeating-linear-gradient(-45deg, rgb(var(--c-chalk) / 0.16) 0 1px, transparent 1px 5px);
+  }
+  .table-centre-line {
+    @apply pointer-events-none h-px bg-chalk/35;
+  }
+  .table-tab {
+    @apply relative -mb-px inline-flex min-h-[2.75rem] items-center rounded-t-md px-3 text-[0.95rem]
+      font-semibold text-chalk/75 transition hover:bg-chalk/10 hover:text-chalk sm:px-4;
+  }
+  .table-tab[aria-current='page'] {
+    @apply bg-hall text-ink hover:bg-hall;
+  }
+  .table-tab:focus-visible {
+    outline-color: rgb(var(--c-chalk));
+    outline-offset: -4px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }

@@ -12,45 +12,37 @@ function whenLabel(iso) {
 
 export default function NoticeBoard({ slug, requests = [] }) {
   return (
-    <section className="card flex flex-col overflow-hidden">
-      <div className="border-b border-black/5 px-5 py-4">
-        <h2 className="font-extrabold tracking-tight text-table">Notice Board</h2>
+    <section className="panel flex flex-col overflow-hidden" aria-labelledby="challenges-title">
+      <div className="panel-head">
+        <h2 id="challenges-title" className="panel-title">Open challenges</h2>
+        {requests.length > 0 && <span className="text-sm text-muted">{requests.length} open</span>}
       </div>
 
-      <div className="flex-1 space-y-3 px-5 py-4">
-        {requests.length === 0 ? (
-          <p className="py-6 text-center text-sm text-table/50">
-            No open challenges. Be the first to call someone out! 🏓
-          </p>
-        ) : (
-          requests.map((r) => (
-            <div
-              key={r.id}
-              className="rounded-xl border border-black/5 bg-chalk/60 px-4 py-3 animate-slide-up"
-            >
-              <div className="flex items-center gap-2 font-semibold text-table">
-                <span>🏓</span>
-                <span>
-                  {r.challenger_name} <span className="text-table/40">vs</span>{' '}
-                  {r.opponent_name}
-                </span>
+      {requests.length === 0 ? (
+        <p className="px-5 py-6 text-sm text-muted">
+          No one’s been called out yet. Pick an opponent and post the first challenge.
+        </p>
+      ) : (
+        <ul className="divide-y divide-ink/5">
+          {requests.map((r) => (
+            <li key={r.id} className="px-5 py-3.5">
+              <div className="flex flex-wrap items-baseline gap-x-2 font-semibold">
+                <span>{r.challenger_name}</span>
+                <span className="condensed text-sm font-bold text-ball-dark">v</span>
+                <span>{r.opponent_name}</span>
               </div>
               {r.scheduled_for && (
-                <div className="mt-0.5 text-xs font-medium text-ball">
-                  {whenLabel(r.scheduled_for)}
-                </div>
+                <div className="mt-0.5 text-sm text-muted">{whenLabel(r.scheduled_for)}</div>
               )}
-              {r.message && (
-                <p className="mt-1 text-sm italic text-table/60">“{r.message}”</p>
-              )}
-            </div>
-          ))
-        )}
-      </div>
+              {r.message && <p className="mt-1 text-sm text-ink/75">“{r.message}”</p>}
+            </li>
+          ))}
+        </ul>
+      )}
 
-      <div className="border-t border-black/5 p-4">
+      <div className="border-t border-ink/10 p-4">
         <Link to={`/${slug}/challenge`} className="btn-primary w-full">
-          + Challenge Someone
+          Challenge someone
         </Link>
       </div>
     </section>

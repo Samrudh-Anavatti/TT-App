@@ -10,74 +10,71 @@ export default function Participation({ slug, pin }) {
   const activeThisWeek = data.filter((r) => r.matches_7d > 0).length
 
   return (
-    <section className="card p-6">
-      <div className="flex items-center justify-between gap-3">
-        <h2 className="flex items-center gap-2 font-extrabold tracking-tight text-table">
-          <span aria-hidden>📊</span> Participation
-        </h2>
-        <button className="btn-ghost py-1.5" onClick={rows.reload}>Refresh</button>
+    <section className="panel overflow-hidden" aria-labelledby="participation-title">
+      <div className="panel-head items-center">
+        <h2 id="participation-title" className="panel-title">Participation</h2>
+        <button className="btn-quiet" onClick={rows.reload} disabled={rows.loading}>
+          {rows.loading ? 'Refreshing…' : 'Refresh'}
+        </button>
       </div>
-      <p className="mb-4 mt-1 text-sm text-table/55">
-        Who’s been coming and playing.{' '}
-        {!rows.loading && (
-          <span className="font-semibold text-table">{activeThisWeek}</span>
-        )}
-        {!rows.loading && ' played in the last 7 days.'}
-      </p>
 
       {rows.loading ? (
-        <div className="h-40 animate-pulse rounded-xl bg-table/5" />
-      ) : rows.error ? (
-        <p className="text-sm text-ball">Couldn’t load participation.</p>
-      ) : data.length === 0 ? (
-        <p className="text-sm text-table/50">No players yet.</p>
-      ) : (
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="text-left text-xs uppercase tracking-wide text-table/40">
-                <th className="py-1.5 pr-3">Player</th>
-                <th className="py-1.5 pr-3">Last played</th>
-                <th className="py-1.5 pr-3 text-center">7d</th>
-                <th className="py-1.5 pr-3 text-center">30d</th>
-                <th className="py-1.5 pr-3 text-center">Total</th>
-                <th className="py-1.5 pr-3 text-center">W–L</th>
-                <th className="py-1.5 text-center" title="Challenges raised">Challenges</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-black/5">
-              {data.map((r) => {
-                const idle = r.matches_30d === 0
-                return (
-                  <tr key={r.player_id} className={idle ? 'text-table/45' : ''}>
-                    <td className="py-2 pr-3 font-semibold text-table">
-                      {r.name}
-                      {!r.active && (
-                        <span className="ml-1.5 rounded bg-table/10 px-1.5 py-0.5 text-[10px] font-bold uppercase text-table/50">
-                          inactive
-                        </span>
-                      )}
-                    </td>
-                    <td className="py-2 pr-3">
-                      <span className={idle ? 'text-ball/70' : 'text-table/70'}>
-                        {relTime(r.last_played)}
-                      </span>
-                    </td>
-                    <td className="py-2 pr-3 text-center font-mono">{r.matches_7d}</td>
-                    <td className="py-2 pr-3 text-center font-mono">{r.matches_30d}</td>
-                    <td className="py-2 pr-3 text-center font-mono">{r.matches_played}</td>
-                    <td className="py-2 pr-3 text-center font-mono">
-                      <span className="text-emerald-600">{r.wins}</span>
-                      <span className="text-table/30">–</span>
-                      <span className="text-ball">{r.losses}</span>
-                    </td>
-                    <td className="py-2 text-center font-mono">{r.challenges_made}</td>
-                  </tr>
-                )
-              })}
-            </tbody>
-          </table>
+        <div className="space-y-3 p-5" aria-hidden>
+          <div className="skeleton h-10 w-40" />
+          <div className="skeleton h-40" />
         </div>
+      ) : rows.error ? (
+        <p role="alert" className="field-error px-5 py-4">Can’t load participation. Try Refresh.</p>
+      ) : data.length === 0 ? (
+        <p className="px-5 py-6 text-sm text-muted">No players yet. Add some under Players.</p>
+      ) : (
+        <>
+          <div className="flex items-baseline gap-3 px-5 pb-1 pt-4">
+            <span className="num text-5xl leading-none">{activeThisWeek}</span>
+            <span className="text-sm text-muted">
+              of {data.length} played in the last 7 days
+            </span>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full whitespace-nowrap text-[0.95rem]">
+              <thead>
+                <tr className="border-b border-ink/10 text-left text-xs text-muted">
+                  <th scope="col" className="py-2 pl-5 pr-3 font-medium">Player</th>
+                  <th scope="col" className="py-2 pr-3 font-medium">Last played</th>
+                  <th scope="col" className="py-2 pr-3 text-right font-medium">7 days</th>
+                  <th scope="col" className="py-2 pr-3 text-right font-medium">30 days</th>
+                  <th scope="col" className="py-2 pr-3 text-right font-medium">Total</th>
+                  <th scope="col" className="py-2 pr-3 text-right font-medium">Won–lost</th>
+                  <th scope="col" className="py-2 pr-5 text-right font-medium">Challenges</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-ink/5">
+                {data.map((r) => {
+                  const idle = r.matches_30d === 0
+                  return (
+                    <tr key={r.player_id} className={idle ? 'text-muted' : ''}>
+                      <td className="py-2.5 pl-5 pr-3 font-semibold text-ink">
+                        {r.name}
+                        {!r.active && <span className="ml-2 text-xs font-medium text-muted">Inactive</span>}
+                      </td>
+                      <td className="py-2.5 pr-3">
+                        {relTime(r.last_played)}
+                        {idle && <span className="ml-2 text-xs font-semibold text-ball-dark">Idle</span>}
+                      </td>
+                      <td className="py-2.5 pr-3 text-right tabular-nums">{r.matches_7d}</td>
+                      <td className="py-2.5 pr-3 text-right tabular-nums">{r.matches_30d}</td>
+                      <td className="py-2.5 pr-3 text-right tabular-nums">{r.matches_played}</td>
+                      <td className="py-2.5 pr-3 text-right tabular-nums">
+                        {r.wins}–{r.losses}
+                      </td>
+                      <td className="py-2.5 pr-5 text-right tabular-nums">{r.challenges_made}</td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          </div>
+        </>
       )}
     </section>
   )

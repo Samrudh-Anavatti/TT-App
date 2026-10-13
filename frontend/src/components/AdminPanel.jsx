@@ -19,37 +19,45 @@ export default function AdminPanel({ slug, pin }) {
   }
 
   const list = players.data || []
+  const open = requests.data || []
 
   return (
-    <div className="space-y-5">
-      <RecordMatch slug={slug} pin={pin} players={list} onRecorded={refreshAll} />
+    <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:items-start lg:gap-7">
+      <div className="space-y-5 lg:space-y-7">
+        <RecordMatch slug={slug} pin={pin} players={list} onRecorded={refreshAll} />
 
-      <Participation slug={slug} pin={pin} />
+        <section className="panel overflow-hidden" aria-labelledby="pending-title">
+          <div className="panel-head">
+            <h2 id="pending-title" className="panel-title">Open challenges</h2>
+            {open.length > 0 && <span className="text-sm text-muted">{open.length} open</span>}
+          </div>
+          {open.length === 0 ? (
+            <p className="px-5 py-6 text-sm text-muted">No open challenges right now.</p>
+          ) : (
+            <ul className="divide-y divide-ink/5">
+              {open.map((r) => (
+                <li key={r.id} className="flex items-center justify-between gap-3 px-5 py-3 text-[0.95rem]">
+                  <span className="min-w-0">
+                    <span className="font-semibold">{r.challenger_name}</span>
+                    <span className="condensed mx-1.5 font-bold text-ball-dark">v</span>
+                    <span className="font-semibold">{r.opponent_name}</span>
+                    {r.message && <span className="block truncate text-sm text-muted">“{r.message}”</span>}
+                  </span>
+                  <button className="btn-ghost min-h-[2.25rem] shrink-0 px-3 text-sm" onClick={() => markCompleted(r.id)}>
+                    Mark played
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+      </div>
 
       <ManagePlayers slug={slug} pin={pin} players={list} onChange={players.reload} />
 
-      <section className="card p-6">
-        <h2 className="mb-4 font-extrabold tracking-tight text-table">Pending Requests</h2>
-        {(requests.data || []).length === 0 ? (
-          <p className="text-sm text-table/50">No open challenges.</p>
-        ) : (
-          <ul className="divide-y divide-black/5">
-            {requests.data.map((r) => (
-              <li key={r.id} className="flex items-center justify-between gap-3 py-2.5 text-sm">
-                <span className="text-table">
-                  <span className="font-semibold">{r.challenger_name}</span>
-                  <span className="text-table/40"> → </span>
-                  <span className="font-semibold">{r.opponent_name}</span>
-                  {r.message && <span className="ml-2 italic text-table/40">“{r.message}”</span>}
-                </span>
-                <button className="btn-ghost py-1.5" onClick={() => markCompleted(r.id)}>
-                  Mark Completed
-                </button>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
+      <div className="lg:col-span-2">
+        <Participation slug={slug} pin={pin} />
+      </div>
     </div>
   )
 }
